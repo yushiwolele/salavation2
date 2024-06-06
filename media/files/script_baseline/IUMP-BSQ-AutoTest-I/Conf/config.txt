@@ -1,0 +1,11 @@
+*** Variables ***
+${project_path} D:\\SVN\\44辅助编码存档\\02-自动化测试工具
+${baseline_name} IUMP-BSQ-AutoTest-F
+${download_filepath} ${project_path}\\${baseline_name}\\Files\\Download
+${upload_filepath} ${project_path}\\${baseline_name}\\Files\\Upload
+${page_ip} 192.168.61.51
+${test_data_filepath} ${project_path}\\${baseline_name}\\Files\\TestCaseData.xlsx
+${zdc_txt_path} ${project_path}\\${baseline_name}\\Files\\ZDC_TXT
+${db_filepath} ${project_path}\\${baseline_name}\\Files\\IASP.db
+${image_path} ${project_path}\\${baseline_name}\\Path\\path_image
+${ff_profile_dir} C:\\Users\\user\\19umkw5j.default-esr  

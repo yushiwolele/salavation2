@@ -1,0 +1,1114 @@
+{% extends "layouts/base.html" %}
+{% load project_extras static %}
+{% block title %} 运行脚本 {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+    <style>
+    /* CSS 样式 */
+    .list-group-item button {
+      display: none;
+    }
+     /* 等待框的样式 */
+    .loading-spinner {
+        border: 4px solid rgba(0, 0, 0, 0.3);
+        border-top: 4px solid #0037ff; /* 主题颜色，可以根据需要更改 */
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 2s linear infinite;
+        margin: 0 auto;
+    }
+
+    /* 旋转动画 */
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .full-page-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* 半透明黑色背景 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999; /* 确保在整个页面之上 */
+    }
+    /* 自定义模态框内容样式 */
+    .modal-contentloading {
+        background-color: transparent; /* 透明背景 */
+        border: none; /* 去掉边框 */
+        box-shadow: none; /* 去掉阴影 */
+    }
+    @keyframes blink {
+        0% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.2;
+        }
+        100% {
+            opacity: 1;
+        }
+    }
+
+    .blinking {
+        animation: blink 1s infinite; /* 控制闪动速度和次数，1s表示1秒，infinite表示无限循环 */
+    }
+
+  </style>
+{% endblock stylesheets %}
+{% block content %}
+    <div class="pcoded-content">
+        <div class="pcoded-inner-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <div class="main-body">
+                <div class="page-wrapper">
+                    <!-- [ Main Content ] start -->
+                    <div class="row">
+                        <!-- [ basic-table ] start -->
+                        <div class="col-xl-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><span><i class="feather icon-home">  <a
+                                            href="{% url 'index' %}">首页</a></i></span>
+                                    </h5>
+                                    <span><i class="fa fa-map-marker"></i> 运行脚本</span>
+                                </div>
+
+                                <div id= 'prolist' style="display: block" class="card-block">
+
+                                    <div class="container-fluid">
+                                        <div class="row">
+                                            <!-- 左侧栏 -->
+                                            <div id="left_container" class="col-md-5">
+                                            </div>
+                                             <!-- 右侧栏 -->
+                                            <div class="col-md-7">
+                                                <button id="runButton" class="btn btn-primary mb-2 btn-sm" onclick="check_select_testcases()">运行</button>
+                                                <!-- 文件内容区域 -->
+                                                <textarea id='file_content' class="form-control" rows="10" style="display: none">
+                                                </textarea>
+
+                                                <div id="output" style="max-height:200px;overflow-y: auto;"></div>
+
+                                                <button id="file_update_button" type="button" class="btn btn-success" onclick="updateScriptFile()" style="display: none">更新</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 选择执行环境和浏览器 模态框 -->
+    <div class="modal fade" role="dialog" aria-hidden="true" id="select_env_browser">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>请选择相关信息</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>请选择执行环境：</label>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th>
+                                        <label class="btn active">
+                                            <input type="radio" name="execution_environment" id="option1" autocomplete="off" value="TEST" checked> TEST
+                                        </label>
+                                    </th>
+                                    <th>
+                                        <label class="btn ">
+                                            <input type="radio" name="execution_environment" id="option2" autocomplete="off" value="DEV"> DEV
+                                        </label>
+                                    </th>
+                                    <th>
+                                        <label class="btn ">
+                                            <input type="radio" name="execution_environment" id="option3" autocomplete="off" value="BETA"> BETA
+                                        </label>
+                                    </th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="form-group">
+                        <label>请选择浏览器：</label>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th>
+                                        <label class="btn active">
+                                            <input type="radio" name="browser" id="option4" autocomplete="off" value="Firefox" checked> Firefox
+                                        </label>
+                                    </th>
+                                    <th>
+                                        <label class="btn ">
+                                            <input type="radio" name="browser" id="option5" autocomplete="off" value="Chrome"> Chrome
+                                        </label>
+                                    </th>
+                                    <th>
+                                        <label class="btn ">
+                                            <input type="radio" name="browser" id="option6" autocomplete="off" value="headlessFirefox"> headlessFirefox
+                                        </label>
+                                    </th>
+                                    <th>
+                                        <label class="btn ">
+                                            <input type="radio" name="browser" id="option7" autocomplete="off" value="headlessChrome"> headlessChrome
+                                        </label>
+                                    </th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="run_checked_testcases()">确认</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--等待模态框-->
+    <div class="modal" tabindex="-1" role="dialog" id="overlayModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-contentloading">
+                <!-- 模态框内容 -->
+                <div class="modal-body">
+                    <div class="container mt-5 text-center">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+    <script type="text/javascript">
+        var imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp'];
+        var excelExtensions = ['.xls', '.xlsx', '.xlsm'];
+        var fail_data;
+        var pass_data;
+        var already_ran = false; //已经运行的标志
+        var checked_testcases;
+        var file_content_initial;
+        var file_path;
+        var file_id;
+         // 从会话存储中获取 folders_json
+        var foldersJsonString = sessionStorage.getItem('folders_json');
+        // 清除会话存储中的数据，确保下次刷新时不再使用
+        sessionStorage.removeItem('folders_json');
+        // 解析JSON字符串为JavaScript对象
+        var folders = JSON.parse(foldersJsonString);
+        console.log(folders);
+        //获取最高级路径
+        var folder_root = folders[0].path;
+        get_script_component_list(folders,1);
+        //构建页面元素
+        function buildFolderTree(container,data){
+            let ul = document.createElement("ul");
+            ul.className = "list-group";
+            for(let item of data){
+                let li = document.createElement("li");
+                li.className = "list-group-item";
+                li.setAttribute("data-identifying", "for_identify_the_path");
+                let div_contain_a_button = document.createElement("div");
+                div_contain_a_button.id = "div_" + item.id;
+                document.body.appendChild(div_contain_a_button);
+                // 创建文本节点并设置文本内容
+                let text = document.createTextNode(item.name);
+                //  创建div元素
+                let divChild = document.createElement("div");
+                divChild.className = 'collapse';
+                divChild.id = "floder"+item.id;
+                //如果是robot文件
+                if(item.type === '2'){
+                    let robot_children_testcases = item.children.testcases;
+                    let robot_children_keywords = item.children.keywords;
+                    let robot_children_variables = item.children.variables;
+                    for(let robot_children_testcases_item of robot_children_testcases){
+                        if (robot_children_testcases_item !== "Empty Test Case For Catch Error"){
+                            let robot_testcase_li = document.createElement("li");
+                            robot_testcase_li.className = "list-group-item";
+                            // 创建单选框
+                            let robot_testcase_checkbox = document.createElement("input");
+                            robot_testcase_checkbox.type = "checkbox";
+                            // 将单选框添加到li元素中
+                            robot_testcase_li.appendChild(robot_testcase_checkbox);
+                            // 设置li的文本内容
+                            let robot_children_testcases_item_span = changeName(robot_children_testcases_item,item.path,'1','0');
+                            //robot_testcase_li.appendChild(document.createTextNode(robot_children_testcases_item));
+                            robot_testcase_li.appendChild(robot_children_testcases_item_span);
+                            robot_testcase_li.addEventListener("dblclick", function () {
+                                getFileContent(item.path,item.id);
+                            });
+                            divChild.appendChild(robot_testcase_li);
+                        }
+                    }
+                    for(let robot_children_keywords_item of robot_children_keywords){
+                        let robot_keywords_li = document.createElement("li");
+                        robot_keywords_li.className = "list-group-item fas fa-cog";
+                        let robot_children_keywords_item_span = changeName(robot_children_keywords_item,item.path,'1','1');
+                        //robot_keywords_li.textContent=robot_children_keywords_item;
+                        robot_keywords_li.appendChild(robot_children_keywords_item_span);
+                        robot_keywords_li.addEventListener("dblclick", function () {
+                            getFileContent(item.path,item.id);
+                        });
+                        divChild.appendChild(robot_keywords_li);
+                    }
+                    for(let robot_children_variables_item of robot_children_variables){
+                        let robot_variables_li = document.createElement("li");
+                        robot_variables_li.className = "list-group-item fas fa-circle";
+                        let robot_children_variables_item_span = changeName(robot_children_variables_item,item.path,'1','2');
+                        //robot_variables_li.textContent=robot_children_variables_item;
+                        robot_variables_li.appendChild(robot_children_variables_item_span);
+                        robot_variables_li.addEventListener("dblclick", function () {
+                            getFileContent(item.path,item.id);
+                        });
+                        divChild.appendChild(robot_variables_li);
+                    }
+                }
+
+                if (item.parent_id == null) { //最高级目录
+                    // 创建按钮元素
+                    var downloadButton = document.createElement("button");
+                    downloadButton.className = "btn-xs btn-light";
+                    downloadButton.textContent = "下载";
+                    downloadButton.id = "button_download_div_"+item.id;
+                    // 添加点击事件方法
+                    downloadButton.addEventListener('click', function() {
+                        dowload_script_folder(item.path);
+                    });
+                }
+
+                // 创建 <a> 元素
+                let a = document.createElement("a");
+                a.id = "a_" + item.id;
+                if (item.type === '0' || item.type === '2') { //文件夹
+                    a.setAttribute("data-toggle", "collapse");
+                    a.href = "#floder" + item.id;
+                    a.setAttribute("role", "button");
+                    a.setAttribute("aria-expanded", "false");
+                    a.setAttribute("aria-controls", "#floder" + item.id);
+                    let span = document.createElement("span");
+                    span.className = "fas fa-folder";
+                    a.appendChild(span);
+                    a.appendChild(text);
+                    //如果是robot文件，即要有文件夹功能也要有文件功能
+                    if(item.type === '2'){
+                        let robot_span = document.createElement("span");
+                        robot_span.id = "file_content_"+item.id;
+                        robot_span.setAttribute("contenteditable", true);
+                        robot_span.addEventListener("dblclick", function () {
+                            getFileContent(item.path,item.id);
+                        });
+                        robot_span.appendChild(text);
+                        robot_span.addEventListener("keydown", function (event) {
+                            // 按下回车键时保存修改
+                            if (event.key === "Enter") {
+                                event.preventDefault(); // 阻止默认的回车行为
+                                // 获取编辑后的文本内容
+                                let editedText = robot_span.innerText;
+                                sendChangeName(item.path,'',editedText,'0','');
+                            }
+                        });
+                        let robot_path_input = document.createElement("input");
+                        robot_path_input.id = "inputRobot_"+item.id;
+                        robot_path_input.type = "hidden";  // 设置 input 类型为 "hidden"
+                        robot_path_input.value = item.path; // 设置 input 的值为 item.path
+                        a.appendChild(robot_span);
+                        a.appendChild(robot_path_input);
+                    }
+                    // 创建按钮元素
+                    var selectAllButton = document.createElement("button");
+                    selectAllButton.className = "btn-xs btn-primary";
+                    selectAllButton.textContent = "全选";
+                    selectAllButton.id = "button_selectall_div_"+item.id;
+                    // 添加点击事件方法
+                    selectAllButton.addEventListener('click', function() {
+                        //让item下面所有的复选框全部被选择
+                        let checkboxes = divChild.querySelectorAll('input[type="checkbox"]');
+                        // 遍历复选框元素，并设置它们的 checked 属性为 true
+                        checkboxes.forEach(function(checkbox) {
+                            checkbox.checked = true;
+                        });
+                    });
+                    var deselectAllButton = document.createElement("button");
+                    deselectAllButton.className = "btn-xs btn-info";
+                    deselectAllButton.textContent = "取消全选";
+                    deselectAllButton.id = "button_deselectall_div_"+item.id;
+                    // 添加点击事件方法
+                    deselectAllButton.addEventListener('click', function() {
+                        //让item下面所有的复选框全部被选择
+                        let checkboxes = divChild.querySelectorAll('input[type="checkbox"]');
+                        // 遍历复选框元素，并设置它们的 checked 属性为 false
+                        checkboxes.forEach(function(checkbox) {
+                            checkbox.checked = false;
+                        });
+                    });
+
+                    var selectSucessButton = document.createElement("button");
+                    selectSucessButton.className = "btn-xs btn-success";
+                    selectSucessButton.textContent = "成功case";
+                    selectSucessButton.id = "button_selectsucess_div_"+item.id;
+                    // 添加点击事件方法
+                    selectSucessButton.addEventListener('click', function() {
+                        get_fail_pass_cases(0,item.id);
+                    });
+
+                    var selectFailButton = document.createElement("button");
+                    selectFailButton.className = "btn-xs btn-danger";
+                    selectFailButton.textContent = "失败case";
+                    selectFailButton.id = "button_selectfail_div_"+item.id;
+                    // 添加点击事件方法
+                    selectFailButton.addEventListener('click', function() {
+                        get_fail_pass_cases(1,item.id);
+                    });
+                    //最高级目录不提供删除功能
+                    if (item.parent_id != null){
+                        var deleteButton = document.createElement("button");
+                        deleteButton.className = "btn-xs btn-secondary";
+                        deleteButton.textContent = "删除";
+                        deleteButton.id = "button_delete_div_"+item.id;
+                        // 添加点击事件方法
+                        deleteButton.addEventListener('click', function() {
+                            const isConfirmed = confirm("此操作不可撤回，是否确定删除？");
+                            if (isConfirmed) {
+                                deleteFolderOrFile(item.path);
+                            }
+                        });
+                    }
+                    div_contain_a_button.addEventListener("mouseover", function () {
+                        showFolderButtons(this,item.parent_id);
+                    });
+                    div_contain_a_button.addEventListener("mouseout", function () {
+                        hideFolderButtons(this,item.parent_id);
+                    });
+                }else{ //文件
+                    let span2 = document.createElement("span");
+                    span2.id = "file_content_"+item.id;
+                    //图片和excel不支持查看，因为如果支持查看，必须放在MEDIA_URL下，而上传的自动化脚本用完就删，是放在tmp下的
+                    if(imageExtensions.includes(item.path.toLowerCase().slice(-4)) || excelExtensions.includes(item.path.toLowerCase().slice(-5))){
+                        span2.textContent = '（不支持查看）';
+                    }else{
+                        span2.addEventListener("dblclick", function () {
+                            getFileContent(item.path,item.id); //用id还是path，用path会提高效率吗？？？？？？
+                        });
+                    }
+                    span2.appendChild(text);
+                    a.appendChild(span2);
+                }
+                div_contain_a_button.appendChild(a);
+
+                if(item.type === '0' || item.type === '2'){
+                    div_contain_a_button.appendChild(selectAllButton);
+                    div_contain_a_button.appendChild(deselectAllButton);
+                    div_contain_a_button.appendChild(selectSucessButton);
+                    div_contain_a_button.appendChild(selectFailButton);
+                    if (item.parent_id != null){
+                        div_contain_a_button.appendChild(deleteButton);
+                    }else{
+                        div_contain_a_button.appendChild(downloadButton);
+                    }
+                }
+                // 将所有元素组合在一起
+                li.appendChild(div_contain_a_button);
+                li.appendChild(divChild);
+                ul.appendChild(li);
+                if (item.children.length > 0) {
+                    buildFolderTree(divChild, item.children); // 递归构建子文件夹
+                }
+                container.appendChild(ul);
+            }
+        }
+        function get_script_component_list(folders,delete_flag) {
+            var folderContainer = document.getElementById("left_container");
+            folderContainer.innerHTML = ''; // 将内部 HTML 内容设置为空字符串
+            buildFolderTree(folderContainer,folders);
+            //判断，如果入口是重新执行最新一次脚本，则发送请求获取成功/失败case
+            let rerunflagValue = {{ rerunflag }};
+            if(rerunflagValue === 0 || (delete_flag === 0 && already_ran)){ //入口是重新执行最新一次脚本 或者 删除(已经运行过) （如果是未运行过就进行了删除，则不需要获取成功/失败case）
+                get_classification_case();
+            }
+        }
+        //修改testcases名字
+        function changeName(item,itemPath,robotCaseFlag,contentFlag){
+            let robot_children_testcases_item_span = document.createElement("span");
+            robot_children_testcases_item_span.appendChild(document.createTextNode(item));
+            robot_children_testcases_item_span.setAttribute("contenteditable", true);
+            robot_children_testcases_item_span.addEventListener("keydown", function (event) {
+                // 按下回车键时保存修改
+                if (event.key === "Enter") {
+                    event.preventDefault(); // 阻止默认的回车行为
+                    // 获取编辑后的文本内容
+                    let editedText = robot_children_testcases_item_span.innerText;
+                    sendChangeName(itemPath,item,editedText,robotCaseFlag,contentFlag)
+                }
+            });
+            return robot_children_testcases_item_span;
+        }
+        //修改名字的请求
+        function sendChangeName(itemPath,initialName,editedText,robotCaseFlag,contentFlag){
+            $.ajax({
+                type: "POST",
+                url: "{% url 'testcases:change_name' %}",
+                data: JSON.stringify({"itemPath": itemPath,"initialName":initialName,"editedText":editedText,'robotCaseFlag':robotCaseFlag,"contentFlag":contentFlag}),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                headers: {"X-CSRFToken": $('[name="csrfmiddlewaretoken"]').val()},
+                success: function (result) {
+                    //不做任何操作
+                },
+                error:function () {
+                    //不做任何操作
+                }
+            });
+        }
+        //删除
+        function deleteFolderOrFile(itemPath){
+            //最高级路径 folder_root
+            $.ajax({
+                type: "POST",
+                url: "{% url 'testcases:delete_folder_file' %}",
+                data: JSON.stringify({"itemPath": itemPath,"folder_root":folder_root}),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                headers: {"X-CSRFToken": $('[name="csrfmiddlewaretoken"]').val()},
+                success: function (result) {
+                    //不做任何操作
+                    if(result.code === 200){
+                        let data = result.data;
+                        //获取最高级路径
+                        folder_root = data[0].path;
+                        //重新渲染页面
+                        get_script_component_list(data,0);
+                    }else{
+                        bootbox.alert({
+                            message: result.data,
+                            size: 'small'
+                        });
+                    }
+                },
+                error:function () {
+                    bootbox.alert({
+                        message: '删除测试脚本接口请求失败！',
+                        size: 'small'
+                    });
+                }
+            });
+
+        }
+        //获取文件内容
+        function getFileContent(spanElementpath,fileId){
+            $.ajax({
+                type: "get",
+                url: "{% url 'testcases:get_script_file_content' %}?path="+spanElementpath+"&tags=2",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                headers: {"X-CSRFToken": $('[name="csrfmiddlewaretoken"]').val()},
+                success: function (result) {
+                    if (result.code === 200) {
+                        var data = result.data;
+                        if (data.code === 0){ //正确读取文本文件
+                            //展示在右侧
+                            file_path = spanElementpath;
+                            file_id = fileId;
+                            file_content_initial = data.file_contents;
+                            showFileContent(data.file_contents);
+                        }else if(data.code === 2){ //正确读取图片文件路径
+                            //这里不支持查看图片,无需执行任何操作
+                        }else if(data.code === 3){//正确读取excel文件路径
+                             //这里不支持查看图片,无需执行任何操作
+                        }else{//读取文件时有误
+                            bootbox.alert({
+                                message: data.file_contents+"请联系管理员！",
+                                size: 'small'
+                            });
+                        }
+                    }
+                },
+                error:function () {
+                    bootbox.alert({
+                        message: '获取测试脚本内容接口请求失败！',
+                        size: 'small'
+                    });
+                }
+            });
+        }
+        //展示文件内容
+        function showFileContent(file_contents) {
+            //获取textarea
+            var textAreaElement = document.getElementById('file_content');
+            textAreaElement.value = file_contents;
+            textAreaElement.style.display = 'block';
+            textAreaElement.style.height = 'auto'; // 重置高度以便重新计算
+            textAreaElement.style.height = (textAreaElement.scrollHeight) + 'px'; // 设置新的高度
+            var file_update_button = document.getElementById('file_update_button');
+            file_update_button.style.display = 'block';
+        }
+        //更新脚本套件文件内容
+        function updateScriptFile(){
+            //比较文件内容是否更改了
+            var textAreaContent = document.getElementById('file_content').value;
+            if (textAreaContent !== file_content_initial){
+                file_content_initial = textAreaContent;
+                //调用接口，更改文件内容
+                update_script_file_content(file_path,textAreaContent,file_id);
+            }else{
+                bootbox.alert({
+                    message: '文件未做任何修改！',
+                    size: 'small'
+                });
+            }
+        }
+        //物理更改文件内容
+        function update_script_file_content(file_path,file_Content,file_id){
+            $.ajax({
+                type: "POST",
+                url: "{% url 'testcases:update_auto_script_file_content' %}",
+                data: JSON.stringify({"path": file_path,"content":file_Content}),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                headers: {"X-CSRFToken": $('[name="csrfmiddlewaretoken"]').val()},
+                success: function (result) {
+                    let msg;
+                    if(result.data.code === 0){ //更新成功
+                        //前端删除   result.data.data
+                        msg = '更新成功';
+                        let inputElement = document.querySelector('input[id="inputRobot_'+file_id+'"]');
+                        if (inputElement) {
+                            let dataObject = result.data.data;
+                            // 获取input元素的父元素
+                            let containerElement = inputElement.parentNode;
+                            // 获取父元素的id
+                            let targetDivId = (containerElement.id).replace('a_','floder');
+                            // 获取目标 div 元素
+                            let targetDiv = document.getElementById(targetDivId);
+                            // 重构 div 内容
+                            if (targetDiv) {
+                                // 清空 div 内容
+                                targetDiv.innerHTML = '';
+                                // 处理 testcases 数组
+                                if (dataObject.testcases && dataObject.testcases.length > 0) {
+                                    dataObject.testcases.forEach(function(testcase) {
+                                        var listItem = document.createElement('li');
+                                        listItem.className = 'list-group-item';
+
+                                        var checkbox = document.createElement('input');
+                                        checkbox.type = 'checkbox';
+
+                                        var span = document.createElement('span');
+                                        span.contentEditable = true;
+                                        span.textContent = testcase;
+
+                                        listItem.appendChild(checkbox);
+                                        listItem.appendChild(span);
+
+                                        targetDiv.appendChild(listItem);
+                                    });
+                                }
+
+                                // 处理 keywords 数组
+                                if (dataObject.keywords && dataObject.keywords.length > 0) {
+                                    dataObject.keywords.forEach(function(keyword) {
+                                        var listItem = document.createElement('li');
+                                        listItem.className = 'list-group-item fas fa-cog';
+                                        var span = document.createElement('span');
+                                        span.contentEditable = true;
+                                        span.textContent = keyword;
+                                        listItem.appendChild(span);
+                                        targetDiv.appendChild(listItem);
+                                    });
+                                }
+                                // 处理 variables 数组
+                                if (dataObject.variables && dataObject.variables.length > 0) {
+                                    dataObject.variables.forEach(function(variable) {
+                                        var listItem = document.createElement('li');
+                                        listItem.className = 'list-group-item fas fa-circle';
+                                        var span = document.createElement('span');
+                                        span.contentEditable = true;
+                                        span.textContent = variable;
+                                        listItem.appendChild(span);
+                                        targetDiv.appendChild(listItem);
+                                    });
+                                }
+                            }
+                        }else{
+                            //未找到元素，不处理
+                        }
+                    }else{
+                        msg = result.data.data;
+                    }
+                    bootbox.alert({
+                        message: msg,
+                        size: 'small'
+                    });
+                },
+                error:function () {
+                    bootbox.alert({
+                        message: '配置文件接口请求失败！',
+                        size: 'small'
+                    });
+                }
+            });
+        }
+
+        function showFolderButtons(divItem,itemParentId) {
+            //获取id
+            var id = divItem.getAttribute("id");
+            //获取Button id
+            selectall_button = document.getElementById('button_selectall_'+id);
+            deselectall_button = document.getElementById('button_deselectall_'+id);
+            selectsucess_button = document.getElementById('button_selectsucess_'+id);
+            selectfail_button = document.getElementById('button_selectfail_'+id);
+            selectall_button.style.display = "inline-block";
+            deselectall_button.style.display = "inline-block";
+            selectsucess_button.style.display = "inline-block";
+            selectfail_button.style.display = "inline-block";
+            if(itemParentId != null){
+                delete_button = document.getElementById('button_delete_'+id);
+                delete_button.style.display = "inline-block";
+            }else{
+                download_button = document.getElementById('button_download_'+id);
+                download_button.style.display = "inline-block";
+            }
+         }
+
+        function hideFolderButtons(divItem,itemParentId) {
+            //获取id
+            var id = divItem.getAttribute("id");
+            //获取Button id
+            selectall_button = document.getElementById('button_selectall_'+id);
+            deselectall_button = document.getElementById('button_deselectall_'+id);
+            selectsucess_button = document.getElementById('button_selectsucess_'+id);
+            selectfail_button = document.getElementById('button_selectfail_'+id);
+
+            selectall_button.style.display = "none";
+            deselectall_button.style.display = "none";
+            selectsucess_button.style.display = "none";
+            selectfail_button.style.display = "none";
+            if(itemParentId != null){
+                delete_button = document.getElementById('button_delete_'+id);
+                delete_button.style.display = "none";
+            }else{
+                download_button = document.getElementById('button_download_'+id);
+                download_button.style.display = "none";
+            }
+        }
+        //获取case
+        function get_checked_testcases(){
+            // 获取所有的复选框
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            // 存储结果的对象
+            const result = {};
+            checkboxes.forEach(function(checkbox) {
+                const fileName = checkbox.closest('li[data-identifying="for_identify_the_path"]').querySelector('a input[type="hidden"]').value.trim();
+                const textContent = checkbox.nextElementSibling.textContent;
+                // 检查键是否存在于 result 对象中，如果不存在，则将其初始化为空数组
+                if (!result[fileName]) {
+                    result[fileName] = [];
+                }
+                result[fileName].push(textContent);
+            })
+            return result;
+        }
+        //运行case
+        {#function run_checked_testcases(){#}
+        {#    var execution_environment = (document.querySelector('input[name="execution_environment"]:checked')).value; //执行环境#}
+        {#    var browser = document.querySelector('input[name="browser"]:checked').value; //浏览器#}
+        {#    const requestData = {#}
+        {#        checked_testcases,#}
+        {#        folder_root,#}
+        {#        execution_environment,#}
+        {#        browser#}
+        {#    };#}
+        {#    const requestDataJSON = JSON.stringify(requestData);#}
+        {#    fetch('/testcases/run_testcases/', {#}
+        {#        method: 'POST',#}
+        {#        headers: {#}
+        {#            'Content-Type': 'application/json',#}
+        {#        },#}
+        {#        body: requestDataJSON,#}
+        {#     })#}
+        {#    .then(response => response.json())#}
+        {#    .then(data => {#}
+        {#        // 处理后台返回的数据#}
+        {#        console.log(data);#}
+        {#     })#}
+        {#    .catch(error => {#}
+        {#        console.error('Error:', error);#}
+        {#     });#}
+        {# }#}
+
+        function run_checked_testcases(){
+            //每次执行，要把结果置空
+            fail_data = null;
+            pass_data = null;
+            //模态框消失
+            $('#select_env_browser').modal('hide');
+            var execution_environment = (document.querySelector('input[name="execution_environment"]:checked')).value; //执行环境
+            var browser = document.querySelector('input[name="browser"]:checked').value; //浏览器
+            const requestData = {
+                checked_testcases,
+                folder_root,
+                execution_environment,
+                browser
+             };
+            const requestDataJSON = JSON.stringify(requestData);
+            const textAreaElement = document.getElementById('file_content');
+            textAreaElement.value = '';
+            textAreaElement.style.display = 'block';
+
+            //更新按钮隐藏
+            const file_update_buttonElement = document.getElementById('file_update_button');
+            file_update_buttonElement.style.display = 'none';
+
+            //按钮闪动
+            startButtonAnimation();
+            //按钮禁止
+            var runButton = document.getElementById("runButton");
+            runButton.disabled = true;
+            $.ajax({
+                url: "{% url 'testcases:run_testcases' %}",
+                type: 'POST',
+                dataType: "json",
+                async: true,  // 是否异步
+                data: requestDataJSON,
+                xhrFields: {
+                    onprogress: function (e) {// 每当有新数据到达时被调用
+                        if(e.currentTarget.status === 200){
+                            // 更新页面内容
+                            if (e.currentTarget.responseText.includes('run_script_completed')) {
+                            //if (responseData.status === 'run_script_completed') {
+                                // 进程完成时的处理
+                                stopButtonAnimation();
+                                runButton.disabled = false;
+                                bootbox.alert({
+                                    message: '执行结束。',
+                                    size: 'small'
+                                });
+                                already_ran = true;
+                                //发送ajax，获取成功失败状态
+                                get_classification_case();
+                            } else if(e.currentTarget.responseText.includes('run_script_error')) {
+                            //} else if (responseData.status === 'run_script_error') {
+                                // 进程完成时的处理
+                                stopButtonAnimation();
+                                runButton.disabled = false;
+                                bootbox.alert({
+                                    message: e.currentTarget.responseText,
+                                    size: 'small'
+                                });
+                                textAreaElement.style.display = 'none';
+                            }else if(e.currentTarget.responseText.includes('run_script_process_error')){
+                            //} else if (responseData.status === 'run_script_process_error') {
+                                // 进程完成时的处理
+                                stopButtonAnimation();
+                                runButton.disabled = false;
+                                bootbox.alert({
+                                    message: '执行过程发生异常，请联系管理员。',
+                                    size: 'small'
+                                });
+                            } else {
+                                textAreaElement.value = '';
+                                textAreaElement.value = e.currentTarget.responseText;
+                                textAreaElement.style.height = 'auto'; // 重置高度以便重新计算
+                                textAreaElement.style.height = (textAreaElement.scrollHeight) + 'px'; // 设置新的高度
+                                textAreaElement.scrollTop = textAreaElement.scrollHeight;
+                            }
+                        }else{ //报错
+                            stopButtonAnimation();
+                            runButton.disabled = false;
+                            bootbox.alert({
+                                message: "执行异常："+e.currentTarget.responseText,
+                                size: 'small'
+                            });
+                            textAreaElement.style.display = 'none';
+                        }
+                    },
+                    onload: function (e) {
+                        console.log(e);
+                    }
+                }
+             })
+        }
+
+        function ws_run_checked_testcases(){
+            //模态框消失
+            $('#select_env_browser').modal('hide');
+            //按钮闪动
+            startButtonAnimation();
+            //发送websocket
+            const socket = new WebSocket('ws://127.0.0.1:8000/ws/ws_run_script/');
+            var execution_environment = (document.querySelector('input[name="execution_environment"]:checked')).value; //执行环境
+            var browser = document.querySelector('input[name="browser"]:checked').value; //浏览器
+            const requestData = {
+                checked_testcases,
+                folder_root,
+                execution_environment,
+                browser
+            };
+            const requestDataJSON = JSON.stringify(requestData);
+            // 当连接打开时
+            socket.addEventListener('open', (event) => {
+                socket.send(requestDataJSON);
+                // 启动心跳检测
+                ////startHeartbeat(socket);
+                const textAreaElement = document.getElementById('file_content');
+                textAreaElement.style.display = 'block';
+            });
+            // 当接收到消息时
+            socket.addEventListener('message', (event) => {
+                const data = JSON.parse(event.data);
+                const logContent = data.log_content;
+                // 处理消息的代码
+                console.log(logContent);
+                if (data.execution_status === 'completed') {
+                    socket.close();
+                    bootbox.alert({
+                        message: data.log_content,
+                        size: 'small'
+                    });
+                 } else {
+                    console.log("打印log");
+                    // 更新日志内容
+                    const textAreaElement = document.getElementById('file_content');
+                    textAreaElement.innerHTML  += data.log_content;
+                    textAreaElement.style.height = 'auto'; // 重置高度以便重新计算
+                    textAreaElement.style.height = (textAreaElement.scrollHeight) + 'px'; // 设置新的高度
+                 }
+            });
+            // 当连接关闭时
+            socket.addEventListener('close', (event) => {
+                stopButtonAnimation();
+                bootbox.alert({
+                    message: 'WebSocket连接已关闭',
+                    size: 'small'
+                });
+            });
+            // 当发生错误时
+            socket.addEventListener('error', (event) => {
+                stopButtonAnimation();
+                bootbox.alert({
+                    message: 'WebSocket连接发生错误'+event,
+                    size: 'small'
+                });
+            });
+        }
+
+        function startHeartbeat(socket) {
+            // 定时发送 ping 消息
+            const heartbeatInterval = setInterval(() => {
+                console.log(socket.readyState);
+                if (socket.readyState === WebSocket.OPEN) {
+                    socket.send('ping');
+                }
+            }, 3000);  // 每隔5秒发送一次 ping
+
+            // 监听服务器的 pong 消息
+            socket.addEventListener('message', (event) => {
+                console.log(event);
+                if (event.data === 'pong') {
+                    // 收到 pong 消息，表示连接正常
+                    console.log('Received PONG from server');
+                }
+            });
+            // 监听连接关闭事件，清除定时器
+            socket.addEventListener('close', () => {
+                clearInterval(heartbeatInterval);
+            });
+        }
+        function check_select_testcases(){
+            checked_testcases = JSON.stringify(get_checked_testcases());
+            //如果为空，则提示
+            if (checked_testcases === '{}') {
+                bootbox.alert({
+                    message: '请选择用例！',
+                    size: 'small'
+                });
+                return;
+            }
+            $('#select_env_browser').modal('show');
+        }
+        function startButtonAnimation(){
+            const runButton = document.getElementById('runButton');
+            runButton.classList.add('blinking');
+        }
+        function stopButtonAnimation() {
+            const runButton = document.getElementById('runButton');
+            runButton.classList.remove('blinking');
+        }
+
+        //下载脚本
+        function dowload_script_folder(folder_path) {
+            $.ajax({
+                url: "{% url 'testcases:download_script_ran_folder' %}?folder_path="+folder_path,
+                type: 'get',
+                xhrFields:{
+                    responseType: 'blob'
+                },
+                success: function(data, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        // 下载 zip 文件
+                        const blob = new Blob([data], { type: 'application/zip' });
+                        const contentDisposition = xhr.getResponseHeader('Content-Disposition');
+                        let filename = contentDisposition.split(";")[1]; //filename = contentDisposition.split(";")[0]; 可以用这个模拟失败报错提示场景
+                        filename =filename.match(/filename=([^&]+)/);
+                        fileName_fin = decodeURIComponent(filename[1]);
+                        download_file(blob,fileName_fin)
+                    }else if(xhr.status === 226){
+                        const msg = xhr.getResponseHeader('msg');
+                        bootbox.alert({
+                            message: decodeURIComponent(msg),
+                            size: 'small'
+                         });
+                    }
+                },
+                error: function(data, textStatus, xhr) {
+                    bootbox.alert({
+                        message: '下载脚本接口请求失败！',
+                        size: 'small'
+                     });
+                }
+            });
+        }
+
+        function download_file(blob,fileName_fin){
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = fileName_fin;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        //获取失败case
+        function get_fail_pass_cases(classification_flag,buttonId) {
+            let folderId = "floder"+buttonId;
+            let listItems = document.getElementById(folderId).querySelectorAll('li.list-group-item:not(.fas):not(.fa-cog)');
+            listItems.forEach(function(liElement) {
+                // 获取 li 元素下的 checkbox 元素
+                let checkboxElement = liElement.querySelector('input[type="checkbox"]');
+                if(!checkboxElement){
+                    return;
+                }
+                // 获取 li 元素下的 span 元素
+                let spanElement = liElement.querySelector('span');
+                if (classification_flag === 0){ //成功
+                    // 判断 span 元素的样式是否为红色
+                    checkboxElement.checked = spanElement.style.color === "green";
+                }else if(classification_flag === 1){
+                    // 判断 span 元素的样式是否为绿色
+                    checkboxElement.checked = spanElement.style.color === "red";
+                }
+            });
+        }
+
+        //获取失败、成功case
+        function get_classification_case(){
+            if(fail_data == null && pass_data == null){ //两者都是null再发送
+                $.ajax({
+                    url: "{% url 'testcases:get_failed_passed_case' %}?folder_path="+folder_root,
+                    type: 'get',
+                    dataType: "json",
+                    success: function(result) {
+                        if(result.data.code === 0){
+                            fail_data = result.data.data.fail_data;
+                            pass_data = result.data.data.pass_data;
+                            render_classification_result();
+                        }else{
+                            bootbox.alert({
+                                message: result.data.data,
+                                size: 'small'
+                            });
+                        }
+                    },
+                    error: function() {
+                        bootbox.alert({
+                            message: '获取执行脚本结果接口请求失败！',
+                            size: 'small'
+                         });
+                    }
+                });
+            }else{ //有一个不是null或者都不是null，不发送请求，直接渲染页面
+                render_classification_result();
+            }
+        }
+
+        //根据 fail_data/pass_data渲染页面
+        function render_classification_result(){
+            //渲染页面
+            let hiddenInputs = document.querySelectorAll("input[type='hidden']");
+            hiddenInputs.forEach(function(hiddenInput) {
+                let key = hiddenInput.value;
+                let fail_cases = fail_data[key];
+                let pass_cases = pass_data[key];
+                let inputParentElement = hiddenInput.parentElement;
+                let divTestCaseId = (inputParentElement.id).replace('a_','floder');
+                let divTestCase = document.getElementById(divTestCaseId);
+                let listItems = divTestCase.querySelectorAll('li');
+
+                // 遍历每个<li>元素
+                listItems.forEach(function (liElement) {
+                    // 获取<li>元素下的<span>元素
+                    let spanElement = liElement.querySelector('span');
+                    // 检查<span>元素的内容是否在列表中
+                    let testName = spanElement.textContent.trim(); //检查功能基本流程
+                    try{
+                        let fail_testInList = fail_cases.some(function (test) {
+                          return test.test_name === testName;
+                        });
+                        // 如果在失败测试列表中，则设置字体为红色
+                        if (fail_testInList) {
+                            spanElement.style.color = 'red';
+                            {#let fail_checkboxElement = liElement.querySelector('input[type="checkbox"]');#}
+                            {#fail_checkboxElement.checked = true;#}
+                            return;
+                        }
+                    }catch (e) {
+                        //不处理
+                    }
+                    try{
+                        let pass_testInList = pass_cases.some(function (test) {
+                          return test.test_name === testName;
+                        });
+                        // 如果在成功测试列表中，则设置字体为绿色
+                        if (pass_testInList) {
+                            spanElement.style.color = 'green';
+                            return;
+                        }
+                    }catch (e) {
+                        //不处理
+                    }
+                    //如果即不在red，也不在green，就去掉spanElement.style.color属性
+                    spanElement.style.color = '';
+                });
+            });
+        }
+
+
+
+    </script>
+
+{% endblock javascripts %}

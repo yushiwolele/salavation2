@@ -1,0 +1,7 @@
+*** Settings ***
+Suite Setup       登录2
+Force Tags        ZXX_0012_0030
+Library           Selenium2Library
+Resource          ../自定义用户关键字/公用关键字.robot
+
+*** Keywords ***

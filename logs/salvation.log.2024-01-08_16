@@ -1,0 +1,3 @@
+[ERROR][2024-01-08 15:56:01,575][runTestCases_service.py:455]--报错信息：AttributeError("'dict' object has no attribute 'pk'"),报错的行号:448
+[ERROR][2024-01-08 16:02:38,915][runTestCases_service.py:456]--报错信息：AttributeError("'dict' object has no attribute 'pk'"),报错的行号:449
+[ERROR][2024-01-08 16:04:26,308][runTestCases_service.py:456]--报错信息：AttributeError("'dict' object has no attribute 'pk'"),报错的行号:449

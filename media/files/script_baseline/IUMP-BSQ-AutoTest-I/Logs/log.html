@@ -1,0 +1,563 @@
+{% extends "layouts/base.html" %}
+{% load project_extras static %}
+{% block title %} 脚本基线 {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+    <style>
+    /* CSS 样式 */
+    .list-group-item button {
+      display: none;
+    }
+     /* 等待框的样式 */
+    .loading-spinner {
+        border: 4px solid rgba(0, 0, 0, 0.3);
+        border-top: 4px solid #0037ff; /* 主题颜色，可以根据需要更改 */
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 2s linear infinite;
+        margin: 0 auto;
+    }
+
+    /* 旋转动画 */
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .full-page-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* 半透明黑色背景 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999; /* 确保在整个页面之上 */
+    }
+
+    /* 自定义模态框内容样式 */
+    .modal-contentloading {
+        background-color: transparent; /* 透明背景 */
+        border: none; /* 去掉边框 */
+        box-shadow: none; /* 去掉阴影 */
+    }
+  </style>
+{% endblock stylesheets %}
+{% block content %}
+    <div class="pcoded-content">
+        <div class="pcoded-inner-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <div class="main-body">
+                <div class="page-wrapper">
+                    <!-- [ Main Content ] start -->
+                    <div class="row">
+                        <!-- [ basic-table ] start -->
+                        <div class="col-xl-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><span><i class="feather icon-home">  <a
+                                            href="{% url 'index' %}">首页</a></i></span>
+                                    </h5>
+                                    <span><i class="fa fa-map-marker"></i> 基线包列表</span>
+                                </div>
+
+                                <div id= 'prolist' style="display: block" class="card-block">
+                                    <div class='row'>
+                                        <div class="col-8">
+                                            <div class="col-6">
+                                                <div class="btn-group ">
+                                                        <button id='upload_script_component_btn' class="btn btn-light"
+                                                                aria-haspopup="true" aria-expanded="false" style="display: block"
+                                                                onclick="show_upload_modal()">上传基线包文件
+                                                        </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-4">
+                                            <form class="form-inline mb-2">
+                                                <div class="form-group mx-sm-3 mb-2">
+                                                    <input type="text"
+                                                           class="form-control"
+                                                           name="search" ,
+                                                           id='search' ,
+                                                           placeholder="基线包名称" ,
+                                                           value=>
+                                                </div>
+                                                <button type="submit" class="btn btn-secondary mb-2 btn-sm">搜索(功能暂未实现)</button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    <div class="container-fluid">
+                                        <div class="row">
+                                            <!-- 左侧栏 -->
+                                            <div id="left_container" class="col-md-5">
+                                            </div>
+                                             <!-- 右侧栏 -->
+                                            <div class="col-md-7">
+                                                <!-- 文件内容区域，基线包不支持实时更新-->
+                                                <textarea id='file_content' class="form-control" rows="10" style="display: none" readonly>
+                                                </textarea>
+{#                                                <button id="file_update_button" type="button" class="btn btn-success" onclick="updateScriptFile()" style="display: none">更新</button>#}
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--等待模态框-->
+    <div class="modal" tabindex="-1" role="dialog" id="overlayModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-contentloading">
+                <!-- 模态框内容 -->
+                <div class="modal-body">
+                    <div class="container mt-5 text-center">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 上传脚本套件文件夹 - 模态框 -->
+    <div class="modal fade" role="dialog" aria-hidden="true" id="upload_script_component_modal" aria-labelledby="upload_script_component_modal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>请选择要上传的基线包文件夹（无法上传空文件夹）</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="folderUploadForm">
+                        <div class="mb-3">
+                            <label for="folderInput" class="form-label">选择文件夹</label>
+                            <input type="file" id="folderInput" webkitdirectory directory multiple class="form-control">
+                            <input type="hidden" id='update_item_id' value="">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="upload_script_component()">上传</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 上传脚本套件文件 - 模态框 -->
+    <div class="modal fade" role="dialog" aria-hidden="true" id="upload_script_files_component_modal" aria-labelledby="upload_script_files_component_modal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>请选择要上传的套件文件</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="fileUploadForm">
+                        <div class="mb-3">
+                            <label for="fileInput" class="form-label">选择文件</label>
+                            <input type="file" id="fileInput" class="form-control">
+                            <input type="hidden" id='update_file_item_id' value="">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="upload_script_file_component()">上传</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 删除模板 - 模态框 -->
+    <div class="modal fade" id="delete_config_modal" tabindex="-1" role="dialog" aria-labelledby="delete_config_modal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">确认删除？</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    确定要执行删除操作吗？这个操作无法撤销。
+                    <input type="hidden" id='delete_folder_id' value="">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="delete_script_folder()">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+    <script type="text/javascript">
+        let file_path;
+        let file_content_initial;
+        get_script_component_list();
+
+        //构建页面元素
+        function buildFolderTree(container,data){
+            var ul = document.createElement("ul");
+            ul.className = "list-group";
+            for(let item of data){
+                var li = document.createElement("li");
+                li.className = "list-group-item";
+
+                var div_contain_a_button = document.createElement("div");
+                div_contain_a_button.id = "div_" + item.id;
+
+                // 创建文本节点并设置文本内容
+                var text = document.createTextNode(item.name);
+                // 创建按钮元素
+                var updateButton = document.createElement("button");
+                updateButton.className = "btn-xs btn-primary";
+                updateButton.textContent = "更新";
+                updateButton.id = "button_update_div_"+item.id;
+                // 添加点击事件方法
+                updateButton.addEventListener('click', function() {
+                    var update_item_id = document.getElementById('update_item_id');
+                    update_item_id.value = item.id;
+                    //文件和文件夹的更新方式不同
+                    if(item.name.includes(".txt") || item.name.includes(".robot") ){
+                        $('#upload_script_files_component_modal').modal('show');
+                    }else{
+                        $('#upload_script_component_modal').modal('show');
+                    }
+                });
+                var downloadButton = document.createElement("button");
+                downloadButton.className = "btn-xs btn-success";
+                downloadButton.textContent = "下载";
+                downloadButton.id = "button_download_div_"+item.id;
+                // 添加点击事件方法
+                downloadButton.addEventListener('click', function() {
+                    dowload_script_folder(item.id);
+                });
+                var deleteButton = document.createElement("button");
+                deleteButton.className = "btn-xs btn-danger";
+                deleteButton.textContent = "删除";
+                deleteButton.id = "button_delete_div_"+item.id;
+                // 添加点击事件方法
+                deleteButton.addEventListener('click', function() {
+                    var delete_folder_id = document.getElementById('delete_folder_id');
+                    delete_folder_id.value = item.id;
+                    $('#delete_config_modal').modal('show');
+                });
+
+                //  创建div元素
+                var divChild = document.createElement("div");
+                divChild.className = 'collapse';
+                divChild.id = "floder"+item.id;
+
+                // 创建 <a> 元素
+                var a = document.createElement("a");
+                a.id = "a_" + item.id;
+
+                div_contain_a_button.addEventListener("mouseover", function () {
+                    showFolderButtons(this);
+                });
+                div_contain_a_button.addEventListener("mouseout", function () {
+                    hideFolderButtons(this);
+                });
+
+                if (item.children.length > 0) {
+                    a.setAttribute("data-toggle", "collapse");
+                    a.href = "#floder" + item.id;
+                    a.setAttribute("role", "button");
+                    a.setAttribute("aria-expanded", "false");
+                    a.setAttribute("aria-controls", "#floder" + item.id);
+                    var span = document.createElement("span");
+                    span.className = "fas fa-folder";
+                    a.appendChild(span);
+                    a.appendChild(text);
+                }else{
+                    var span2 = document.createElement("span");
+                    span2.id = "file_content_"+item.id;
+                    span2.addEventListener("dblclick", function () {
+                        getFileContent(item.path); //用id还是path，用path会提高效率吗？？？？？？
+                    });
+                    span2.appendChild(text);
+                    a.appendChild(span2);
+                }
+                // 将所有元素组合在一起
+                div_contain_a_button.appendChild(a);
+                div_contain_a_button.appendChild(updateButton);
+                div_contain_a_button.appendChild(downloadButton);
+                div_contain_a_button.appendChild(deleteButton);
+                li.appendChild(div_contain_a_button);
+                li.appendChild(divChild);
+                ul.appendChild(li);
+                if (item.children.length > 0) {
+                    buildFolderTree(divChild, item.children); // 递归构建子文件夹
+                }
+                container.appendChild(ul);
+            }
+        }
+
+        //获取列表数据
+        function get_script_component_list() {
+            $.ajax({
+                type: "get",
+                url: "{% url 'testcases:get_script_list' %}?tags='1'",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                headers: {"X-CSRFToken": $('[name="csrfmiddlewaretoken"]').val()},
+                success: function (result) {
+                    if (result.code === 200) {
+                        console.log(result.data);
+                        var folderContainer = document.getElementById("left_container");
+                        folderContainer.innerHTML = ''; // 将内部 HTML 内容设置为空字符串
+                        buildFolderTree(folderContainer,result.data);
+                    } else{
+                        bootbox.alert({
+                            message: '脚本套件接口请求失败！',
+                            size: 'small'
+                        });
+                    }
+                }
+            });
+        }
+
+        function showFolderButtons(divItem) {
+            //获取id
+            var id = divItem.getAttribute("id");
+            //获取Button id
+            update_button = document.getElementById('button_update_'+id);
+            download_button = document.getElementById('button_download_'+id);
+            delete_button = document.getElementById('button_delete_'+id);
+            update_button.style.display = "inline-block";
+            download_button.style.display = "inline-block";
+            delete_button.style.display = "inline-block";
+         }
+
+        function hideFolderButtons(divItem) {
+            //获取id
+            var id = divItem.getAttribute("id");
+            //获取Button id
+            update_button = document.getElementById('button_update_'+id);
+            download_button = document.getElementById('button_download_'+id);
+            delete_button = document.getElementById('button_delete_'+id);
+            update_button.style.display = "none";
+            download_button.style.display = "none";
+            delete_button.style.display = "none";
+        }
+        //获取文件内容
+        function getFileContent(spanElementpath){
+            $.ajax({
+                type: "get",
+                url: "{% url 'testcases:get_script_file_content' %}?path="+spanElementpath,
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                headers: {"X-CSRFToken": $('[name="csrfmiddlewaretoken"]').val()},
+                success: function (result) {
+                    if (result.code === 200) {
+                        var data = result.data;
+                        if (data.code === 0){
+                            //对fileid的input赋值
+                            file_path = spanElementpath;
+                            file_content_initial = data.file_contents;
+                            //展示在右侧
+                            showFileContent(data.file_contents);
+                        }else{//读取文件时有误
+                            bootbox.alert({
+                                message: data.file_contents+"请联系管理员！",
+                                size: 'small'
+                            });
+                        }
+                    }else{
+                        bootbox.alert({
+                            message: '脚本套件接口请求失败！',
+                            size: 'small'
+                        });
+                    }
+                }
+            });
+        }
+        //展示文件内容
+        function showFileContent(file_contents) {
+            //获取textarea
+            var textAreaElement = document.getElementById('file_content');
+            textAreaElement.value = file_contents;
+            textAreaElement.style.display = 'block';
+            textAreaElement.style.height = 'auto'; // 重置高度以便重新计算
+            textAreaElement.style.height = (textAreaElement.scrollHeight) + 'px'; // 设置新的高度
+            var file_update_button = document.getElementById('file_update_button');
+            file_update_button.style.display = 'block';
+        }
+        //更新脚本套件文件内容
+        function updateScriptFile(){
+            //比较文件内容是否更改了
+            var textAreaContent = document.getElementById('file_content').value;
+            if (textAreaContent !== file_content_initial){
+                //调用接口，更改文件内容
+                update_script_file_content(file_path,textAreaContent);
+            }else{
+                bootbox.alert({
+                    message: '文件未做任何修改！',
+                    size: 'small'
+                });
+            }
+        }
+        //物理更改文件内容
+        function update_script_file_content(file_path,file_Content){
+            $.ajax({
+                type: "POST",
+                url: "{% url 'testcases:update_script_file_content' %}",
+                data: JSON.stringify({"path": file_path,"content":file_Content}),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                headers: {"X-CSRFToken": $('[name="csrfmiddlewaretoken"]').val()},
+                success: function (result) {
+                    bootbox.alert({
+                        message: result.data,
+                        size: 'small'
+                    });
+                },
+                error:function () {
+                    bootbox.alert({
+                        message: '配置文件接口请求失败！',
+                        size: 'small'
+                    });
+                }
+            });
+        }
+        //上传套件文件夹
+        function upload_script_component() {
+            // 获取文件夹选择框的引用
+            var folderInput = document.getElementById('folderInput');
+            // 创建 FormData 对象
+            var formData = new FormData();
+            for (var i = 0; i < folderInput.files.length; i++) {
+                formData.append('files[]', folderInput.files[i]);
+                formData.append('file_paths[]', folderInput.files[i].webkitRelativePath); // 包含每个文件的webkitRelativePath
+            }
+            //如果是上传，则为0，如果是更新则为更新的数据id
+            var update_item_id = document.getElementById('update_item_id');
+            formData.append('update_item_id',update_item_id.value);
+            //弹出等待框
+            $('#overlayModal').addClass('full-page-modal');
+            $('#overlayModal').modal('show');
+            $.ajax({
+                type:"POST",
+                url:"{% url 'testcases:upload_script_component' %}",
+                data: formData,
+                contentType: false,
+                processData: false,
+                headers: {"X-CSRFToken": $('[name="csrfmiddlewaretoken"]').val()},
+                success: function (result) {
+                    bootbox.alert({
+                        message: result.data,
+                        size: 'small'
+                    });
+                    get_script_component_list();
+                },
+                error:function () {
+                    bootbox.alert({
+                        message: '脚本套件接口请求失败！',
+                        size: 'small'
+                    });
+                }
+            }).always(function() {
+                $('#overlayModal').modal('hide');
+                $('#upload_script_component_modal').modal('hide');
+            });
+        }
+        function show_upload_modal() {
+            var update_item_id = document.getElementById('update_item_id');
+            update_item_id.value = 0;
+            console.log(update_item_id.value);
+            $('#upload_script_component_modal').modal('show');
+        }
+        function upload_script_file_component() {
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+            var update_item_id = document.getElementById('update_item_id');
+            var formData = new FormData();
+            formData.append("file", file);
+            formData.append("update_item_id", update_item_id.value);
+            //弹出等待框
+            $('#overlayModal').addClass('full-page-modal');
+            $('#overlayModal').modal('show');
+            $.ajax({
+                type:"POST",
+                url:"{% url 'testcases:upload_script_file_component' %}",
+                data: formData,
+                contentType: false,
+                processData: false,
+                headers: {"X-CSRFToken": $('[name="csrfmiddlewaretoken"]').val()},
+                success: function (result) {
+                    bootbox.alert({
+                        message: result.data,
+                        size: 'small'
+                    });
+                    get_script_component_list();
+                },
+                error:function () {
+                    bootbox.alert({
+                        message: '脚本套件接口请求失败！',
+                        size: 'small'
+                    });
+                 }
+            }).always(function() {
+                $('#overlayModal').modal('hide');
+                $('#upload_script_files_component_modal').modal('hide');
+            });
+        }
+
+        //下载文件夹/文件
+        function dowload_script_folder(folder_id){
+            window.open("/testcases/download_script_folder?folder_id=" + folder_id);
+        }
+        //删除文件夹/文件
+        function delete_script_folder(){
+            var delete_folder_id = document.getElementById('delete_folder_id');
+            $.ajax({
+                type:"POST",
+                url:"{% url 'testcases:delete_script_folder' %}",
+                data: JSON.stringify({"folder_id": delete_folder_id.value}),
+                contentType: false,
+                processData: false,
+                headers: {"X-CSRFToken": $('[name="csrfmiddlewaretoken"]').val()},
+                success: function (result) {
+                    bootbox.alert({
+                        message: result.data,
+                        size: 'small'
+                    });
+                    get_script_component_list();
+                },
+                error:function () {
+                    bootbox.alert({
+                        message: '脚本套件接口请求失败！',
+                        size: 'small'
+                    });
+                 }
+            })
+            $('#delete_config_modal').modal('hide');
+        }
+
+    </script>
+
+{% endblock javascripts %}

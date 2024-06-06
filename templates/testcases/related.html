@@ -1,0 +1,578 @@
+{% extends "layouts/base.html" %}
+{% load project_extras static %}
+{% block title %} 用例相关 {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+{#<link rel="stylesheet" href="{% static 'admin/css/bootstrap.min.css' %}">#}
+    <style>
+        /* 等待框的样式 */
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.3);
+            border-top: 4px solid #0037ff; /* 主题颜色，可以根据需要更改 */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto;
+        }
+
+        /* 旋转动画 */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .full-page-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* 半透明黑色背景 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999; /* 确保在整个页面之上 */
+        }
+
+        /* 自定义模态框内容样式 */
+        .modal-contentloading {
+            background-color: transparent; /* 透明背景 */
+            border: none; /* 去掉边框 */
+            box-shadow: none; /* 去掉阴影 */
+        }
+    </style>
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="pcoded-content">
+        <div class="pcoded-inner-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <div class="main-body">
+                <div class="page-wrapper">
+                    <!-- [ Main Content ] start -->
+                    <div class="row">
+                        <!-- [ basic-table ] start -->
+                        <div class="col-xl-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><span><i class="feather icon-home">  <a
+                                            href="{% url 'index' %}">首页</a></i></span>
+                                    </h5>
+                                    <span><i class="fa fa-map-marker"></i> 相关操作</span>
+                                </div>
+                                <div class="container mt-5">
+                                <div id= 'operate' style="display: block" class="card-block">
+                                    <div class='row'>
+                                        <table>
+                                            <tr>
+                                                <td>
+                                                    <div class="btn btn-primary" data-toggle="modal" data-target="#reuse_common_test_cases">一、生成用例</div>
+                                                </td>
+                                                <td>
+                                                    <div class="btn btn-primary">二、拆分用例（未实现）</div>
+                                                </td>
+                                                <td>
+                                                    <div class="btn btn-primary" onclick="get_script_baseline_name()">三、生成脚本</div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+{#                                                    <div class="btn btn-primary" data-toggle="modal" data-target="#run_robot_modal">四、执行脚本</div>#}
+                                                    <div class="btn btn-primary" data-toggle="modal" data-target="#choose_way_to_run_script">四、执行脚本</div>
+                                                </td>
+                                                <td>
+                                                    <div class="btn btn-primary" data-toggle="modal" data-target="#run_env_tree">五、打包脚本</div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 一、生成《集成测试用例》 模态框 -->
+    <div class="modal fade" role="dialog" aria-hidden="true" id="reuse_common_test_cases">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>请选择要已配置好的用例文件</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="fileUpdateForm">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="file">配置好的用例文件: </label>
+                            <input type="file" class="form-control file-loading" id="file" name="file" accept=".xlsx, .xls, .xlsm">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="generate()">生成</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 三、生成《集成测试用例》 模态框 -->
+    <div class="modal fade" role="dialog" aria-hidden="true" id="generate_auto_test_cases">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>请配置相关信息</h4>
+                </div>
+                <div class="modal-body">
+{#                    <form id="generateTestCaseForm">#}
+{#                        {% csrf_token %}#}
+                        <div class="form-group">
+                            <label for="testcasefile">请选择用例文件：</label>
+                            <input type="file" class="form-control file-loading" id="testcasefile" name="file" accept=".xlsx, .xls, .xlsm">
+                        </div>
+{#                    </form>#}
+                    <div class="form-group">
+                        <label for="scriptBaselineName">请选择基线包：</label>
+                        <select class="form-control" id="scriptBaselineName"></select>
+                    </div>
+                    <div class="form-group">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th>
+                                    <label class="btn active">
+                                        <input type="radio" name="options" id="option1" autocomplete="off" value="EDW" checked> EDW数仓门户
+                                    </label>
+                                </th>
+                                <th>
+                                    <label class="btn ">
+                                        <input type="radio" name="options" id="option2" autocomplete="off" value="BSQ"> BSQ数据查询统计系统
+                                    </label>
+                                </th>
+                                <th>
+                                    <label class="btn ">
+                                        <input type="radio" name="options" id="option3" autocomplete="off" value="JKFW"> JKFW接口服务
+                                    </label>
+                                </th>
+                                <th>
+                                    <label class="btn ">
+                                        <input type="radio" name="options" id="option4" autocomplete="off" value="URM"> URM风控门户
+                                    </label>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label class="btn active">
+                                        <input type="radio" name="options" id="option5" autocomplete="off" value="MON"> MON统一监控
+                                    </label>
+                                </th>
+                                <th>
+                                    <label class="btn ">
+                                        <input type="radio" name="options" id="option6" autocomplete="off" value="FTP"> FTP文件交互平台
+                                    </label>
+                                </th>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="generateScript()">生成</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <!--四、命令模式执行测试用例 模态框 -->
+    <div class="modal fade" role="dialog" aria-hidden="true" id="run_robot_modal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>请选择自动化脚本</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="selectAutoScriptsForm">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="autoScriptFolderInput">自动化脚本文件: </label>
+                            <input type="file" id="autoScriptFolderInput" webkitdirectory directory multiple class="form-control">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="uploadAutoScript()">上传</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 四、命令模式执行测试用例 模态框-->
+    <div class="modal fade" id="choose_way_to_run_script" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">请选择</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="re_execute_latest()">重新执行最新的一次</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="upload_new_script()">上传新脚本</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--五、打包自动化脚本为.exe文件 模态框 -->
+    <div class="modal fade" role="dialog" aria-hidden="true" id="run_env_tree">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>请选择自动化测试脚本基线包（确保基线包中脚本无执行问题）</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="selectBaselineForm">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="file">基线包: </label>
+                            <input type="file" id="baselineFolderInput" webkitdirectory directory multiple class="form-control">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="generateExe()">生成</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--等待模态框-->
+    <div class="modal" tabindex="-1" role="dialog" id="overlayModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-contentloading">
+                <!-- 模态框内容 -->
+                <div class="modal-body">
+                    <div class="container mt-5 text-center">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--成功提示-->
+    <div class="modal fade" role="dialog" aria-hidden="true" id="download_test_cases_success">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>提示</h4>
+                </div>
+                <div class="modal-body">
+                    <label >生成成功！</label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-dismiss="modal">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--失败提示-->
+    <div class="modal fade" role="dialog" aria-hidden="true" id="download_test_cases_fail">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>提示</h4>
+                </div>
+                <div class="modal-body">
+                    <label >生成失败！</label>
+                     <p id="errorText"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-dismiss="modal">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+    <script type="text/javascript">
+    //一、生成《集成测试用例》
+    function generate(){
+        var fileInput = document.getElementById('file');
+        var file = fileInput.files[0];
+        // 创建 FormData 对象
+        var formData = new FormData();
+        formData.append("file", file);
+
+        //弹出等待框
+        $('#overlayModal').addClass('full-page-modal');
+        $('#overlayModal').modal('show');
+
+        var fileName_fin = ''
+        fetch('/testcases/reuseCommonTestCases/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if(response.status >= 500 && response.status <= 599){
+                throw new Error(response.statusText);
+            }
+            const contentDisposition = response.headers.get('Content-Disposition');
+            var filename = contentDisposition.split(";")[1]; //filename = contentDisposition.split(";")[0]; 可以用这个模拟失败报错提示场景
+            filename =filename.match(/filename=([^&]+)/);
+            fileName_fin = decodeURIComponent(filename[1]);
+            return response.blob()})
+        .then(blob => {
+            // 处理后端的响应，包括下载新文件的链接
+            download_file(blob,fileName_fin)
+            $('#overlayModal').modal('hide');
+            $('#reuse_common_test_cases').modal('hide');
+            $('#download_test_cases_success').modal('show');
+        })
+        .catch(error => {
+            $('#overlayModal').modal('hide');
+            $('#reuse_common_test_cases').modal('hide');
+            document.getElementById("errorText").textContent = error.message;
+            $('#download_test_cases_fail').modal('show');
+        });
+    }
+
+    //三、生成《集成测试用例》
+    function generateScript(){
+        //获取单选值
+        var radioButton = document.querySelector('input[type="radio"]:checked');
+        //获取基线包
+        var selectElement = document.getElementById('scriptBaselineName');
+        //获取文件
+        var fileInput = document.getElementById("testcasefile");
+        var file = fileInput.files[0];
+        // 创建 FormData 对象
+        var formData = new FormData();
+        formData.append("file", file);
+        formData.append("system", radioButton.value);
+        formData.append("script_baseline_id", selectElement.value);
+
+        //弹出等待框
+        $('#overlayModal').addClass('full-page-modal');
+        $('#overlayModal').modal('show');
+
+        var fileName_fin = '';
+        fetch('/testcases/generateScript/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if(response.status >= 500 && response.status <= 599){
+                throw new Error(response.statusText);
+            }
+            const contentDisposition = response.headers.get('Content-Disposition');
+            var filename = contentDisposition.split(";")[1]; //filename = contentDisposition.split(";")[0]; 可以用这个模拟失败报错提示场景
+            filename =filename.match(/filename=([^&]+)/);
+            fileName_fin = decodeURIComponent(filename[1]);
+            return response.blob()})
+        .then(blob => {
+            // 处理后端的响应，包括下载新文件的链接
+            download_file(blob,fileName_fin);
+            $('#overlayModal').modal('hide');
+            $('#generate_auto_test_cases').modal('hide');
+            $('#download_test_cases_success').modal('show');
+        })
+        .catch(error => {
+            $('#overlayModal').modal('hide');
+            $('#generate_auto_test_cases').modal('hide');
+            document.getElementById("errorText").textContent = error.message;
+            $('#download_test_cases_fail').modal('show');
+        });
+    }
+
+    //获取基线包名称
+    function get_script_baseline_name() {
+        var level = 0; //文件层级
+        var tags = 1; //文件类型，0-测试套件，1-基线包
+        let scriptBaselineName =  document.getElementById('scriptBaselineName');
+        $.get("/testcases/get_script_baseline_name", {level: level, tags: tags}, function(result) {
+            if(result.code===200){
+                var baseline_name = result.data;
+                if (baseline_name.length === 0) {
+                    scriptBaselineName.innerHTML = "";
+                    const option = document.createElement('option');
+                    option.text = '请选择';
+                    option.value = '';
+                    scriptBaselineName.appendChild(option);
+                } else {
+                    scriptBaselineName.innerHTML = "";
+                    const option = document.createElement('option');
+                    option.text = '请选择';
+                    option.value = '';
+                    scriptBaselineName.appendChild(option);
+                    for (let i = 0; i < baseline_name.length; i++) {
+                        const option = document.createElement('option');
+                        option.text = baseline_name[i]['name'] ;
+                        option.value = baseline_name[i]['id'] ;
+                        scriptBaselineName.appendChild(option);
+                    }
+                }
+                $('#generate_auto_test_cases').modal('show');
+            }
+        });
+    }
+
+    //下载文件
+    function download_file(blob,fileName_fin){
+        var url = window.URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = fileName_fin;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
+    //四、命令模式执行测试用例
+    function uploadAutoScript() {
+        var folderInput = document.getElementById('autoScriptFolderInput');
+        //文件名
+        var folder_name = (folderInput.files[0].webkitRelativePath).split('/')[0];
+        // 创建 FormData 对象
+        var formData = new FormData();
+        for (var i = 0; i < folderInput.files.length; i++) {
+            formData.append('files[]', folderInput.files[i]);
+            formData.append('file_paths[]', folderInput.files[i].webkitRelativePath); // 包含每个文件的webkitRelativePath
+        }
+        formData.append('folder_name',folder_name);
+        $.ajax({
+                type: "POST",
+                url: "{% url 'testcases:uploadAutoScriptToShow' %}",
+                data: formData,
+                contentType: false,
+                processData: false,
+                headers: {"X-CSRFToken": $('[name="csrfmiddlewaretoken"]').val()},
+                success: function (result) {
+                    $('#run_robot_modal').modal('hide');
+                    if (result.code === 200){
+                        // 在成功回调中将 folders_json 存储到会话存储中
+                        sessionStorage.setItem('folders_json', JSON.stringify(result.data));
+                        // 跳转到 B 页面
+                        window.location.href = '/testcases/run_script/?rerunflag=1';
+                    }else{
+                        bootbox.alert({
+                            message: result.data,
+                            size: 'small'
+                        });
+                    }
+                },
+                error:function () {
+                    $('#run_robot_modal').modal('hide');
+                    bootbox.alert({
+                        message: '展示自动化脚本接口请求失败！',
+                        size: 'small'
+                    });
+                }
+            });
+    }
+
+    //五、打包自动化脚本为.exe文件
+    function generateExe() {
+        var folderInput = document.getElementById('baselineFolderInput');
+        //文件名
+        var folder_name = (folderInput.files[0].webkitRelativePath).split('/')[0];
+        // 创建 FormData 对象
+        var formData = new FormData();
+        for (var i = 0; i < folderInput.files.length; i++) {
+            formData.append('files[]', folderInput.files[i]);
+            formData.append('file_paths[]', folderInput.files[i].webkitRelativePath); // 包含每个文件的webkitRelativePath
+        }
+        formData.append('folder_name',folder_name);
+        //弹出等待框
+        $('#overlayModal').addClass('full-page-modal');
+        $('#overlayModal').modal('show');
+        var fileName_fin = '';
+        fetch('/testcases/runEnvFree/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if(response.status >= 500 && response.status <= 599){
+                throw new Error(response.statusText);
+            }
+            const contentDisposition = response.headers.get('Content-Disposition');
+            var filename = contentDisposition.split(";")[1]; //filename = contentDisposition.split(";")[0]; 可以用这个模拟失败报错提示场景
+            filename =filename.match(/filename=([^&]+)/);
+            fileName_fin = decodeURIComponent(filename[1]);
+            return response.blob()})
+        .then(blob => {
+            // 处理后端的响应，包括下载新文件的链接
+            download_file(blob,fileName_fin);
+            $('#overlayModal').modal('hide');
+            $('#run_env_tree').modal('hide');
+            $('#download_test_cases_success').modal('show');
+        })
+        .catch(error => {
+            $('#overlayModal').modal('hide');
+            $('#run_env_tree').modal('hide');
+            document.getElementById("errorText").textContent = error.message;
+            $('#download_test_cases_fail').modal('show');
+        });
+    }
+
+    //四、执行脚本 - 上传新脚本
+    function upload_new_script() {
+        $('#choose_way_to_run_script').modal('hide');
+        $('#run_robot_modal').modal('show');
+    }
+    //四、执行脚本 - 重新执行最新的一次脚本
+    function re_execute_latest() {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'testcases:lastst_script_to_show' %}",
+            contentType: false,
+            processData: false,
+            headers: {"X-CSRFToken": $('[name="csrfmiddlewaretoken"]').val()},
+            success: function (result) {
+                $('#choose_way_to_run_script').modal('hide');
+                if (result.code === 200){
+                    // 在成功回调中将 folders_json 存储到会话存储中
+                    sessionStorage.setItem('folders_json', JSON.stringify(result.data));
+                    // 跳转到 B 页面
+                    window.location.href = '/testcases/run_script/?rerunflag=0';
+                }else{
+                    bootbox.alert({
+                        message: result.data,
+                        size: 'small'
+                    });
+                }
+            },
+            error:function () {
+                $('#choose_way_to_run_script').modal('hide');
+                bootbox.alert({
+                    message: '重新执行自动化脚本接口请求失败！',
+                    size: 'small'
+                });
+            }
+        });
+    }
+
+    </script>
+{% endblock javascripts %}

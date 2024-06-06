@@ -1,0 +1,5 @@
+驱动位置（例如：C:\Users\chromedriver.exe）：
+
+测试环境（TEST/DEV/BETA）：
+
+浏览器（Firefox/Chrome/headlessFirefox/headlessChrome）:

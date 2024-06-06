@@ -1,0 +1,8 @@
+--report
+F:\Salvation\tmp\autoScript\uid_1\55e7230f-b9c0-4a89-b1a4-81b8aa0b6436\BSQ2023001-P8-URM-AutoTest-I-20231228\Logs\report
+--log
+F:\Salvation\tmp\autoScript\uid_1\55e7230f-b9c0-4a89-b1a4-81b8aa0b6436\BSQ2023001-P8-URM-AutoTest-I-20231228\Logs\log
+--output
+F:\Salvation\tmp\autoScript\uid_1\55e7230f-b9c0-4a89-b1a4-81b8aa0b6436\BSQ2023001-P8-URM-AutoTest-I-20231228\Logs\output
+--test
+BSQ2023001-P8-URM-AutoTest-I-20231228.Programs.业务统计查询系统.单项选择框.单项选择框1

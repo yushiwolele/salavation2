@@ -1,0 +1,16 @@
+=<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>项目名称</th>
+        <th>项目负责人</th>
+        <th>项目当前状态</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for pro in prolist %}
+        <td>{{ pro.project_name }}</td>
+        <td>{{ pro.project_person }}</td>
+        <td>{{ pro.project_current_state }}</td>
+    {% endfor %}
+    </tbody>
+</table>

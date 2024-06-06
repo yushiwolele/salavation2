@@ -1,0 +1,184 @@
+{% extends "layouts/base.html" %}
+{% load project_extras static %}
+{% block title %} 更新tmp {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+
+    <style>
+        .table {
+            table-layout: fixed;
+            width: 100%;
+        }
+    </style>
+{% endblock stylesheets %}
+{% block content %}
+    <div class="pcoded-content">
+        <div class="pcoded-inner-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <div class="main-body">
+                <div class="page-wrapper">
+                    <!-- [ Main Content ] start -->
+                    <div class="row">
+                        <!-- [ basic-table ] start -->
+                        <div class="col-xl-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><span><i class="feather icon-home">  <a
+                                            href="{% url 'index' %}">首页</a></i></span>
+                                    </h5>
+                                    <span><i class="fa fa-map-marker"></i> 配置文件列表</span>
+                                </div>
+
+                                <div id= 'prolist' style="display: block" class="card-block">
+                                    <div class='row'>
+                                        <div class="col-8">
+                                            <div class="col-6">
+                                                <div class="btn-group ">
+                                                        <button id='upload_template_btn' class="btn btn-light" data-toggle="modal"
+                                                                aria-haspopup="true" aria-expanded="false" style="display: block"
+                                                                data-target="#upload_config_modal">上传配置文件
+                                                        </button>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-4">
+                                            <form class="form-inline mb-2">
+                                                <div class="form-group mx-sm-3 mb-2">
+                                                    <input type="text"
+                                                           class="form-control"
+                                                           name="search" ,
+                                                           id='search' ,
+                                                           placeholder="配置文件名称" ,
+                                                           value=>
+                                                </div>
+                                                <button type="submit" class="btn btn-secondary mb-2 btn-sm">搜索(功能暂未实现)</button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    <!--所有项目-->
+                                    <div id='allconfigs' style="display: block" class="table-responsive ">
+                                        <form id="updateForm">
+                                            <input type="hidden" id="id" name="id">
+                                            <div class="form-group">
+                                                <label for="systemName">系统名称</label>
+                                                <input type="text" class="form-control" id="systemName" name="systemName">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="level1">一级目录</label>
+                                                <input type="text" class="form-control" id="level1" name="level1">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="level2">二级目录</label>
+                                                <input type="text" class="form-control" id="level2" name="level2">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="level3">三级目录</label>
+                                                <input type="text" class="form-control" id="level3" name="level3">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="level4">四级目录</label>
+                                                <input type="text" class="form-control" id="level4" name="level4">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="functionName">功能名称</label>
+                                                <input type="text" class="form-control" id="functionName" name="functionName">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="functionCode">功能编号</label>
+                                                <input type="text" class="form-control" id="functionCode" name="functionCode">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="importanceLevel">重要级别</label>
+                                                <input type="text" class="form-control" id="importanceLevel" name="importanceLevel">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="queryString">查询条件字符串</label>
+                                                <textarea class="form-control" id="queryString" name="queryString"></textarea>
+                                            </div>
+                                            <button type="button" class="btn btn-secondary" id="cancelBtn">取消</button>
+                                            <button type="button" class="btn btn-primary" id="updateBtn">更新</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+    <script type="text/javascript">
+        $(document).ready(function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            const currentPage = urlParams.get('page');
+
+            // 获取数据的 AJAX 请求
+            $.ajax({
+                url: '/api/getData', // 替换为实际的数据获取接口
+                method: 'GET',
+                data: { id: id },
+                success: function(data) {
+                    // 填充表单数据
+                    $('#id').val(data.id);
+                    $('#systemName').val(data.systemName);
+                    $('#level1').val(data.level1);
+                    $('#level2').val(data.level2);
+                    $('#level3').val(data.level3);
+                    $('#level4').val(data.level4);
+                    $('#functionName').val(data.functionName);
+                    $('#functionCode').val(data.functionCode);
+                    $('#importanceLevel').val(data.importanceLevel);
+                    $('#queryString').val(data.queryString);
+                },
+                error: function(err) {
+                    console.error('获取数据失败', err);
+                }
+            });
+
+            // 取消按钮点击事件
+            $('#cancelBtn').click(function() {
+                window.location.href = `index.html?page=${currentPage}`;
+            });
+
+            // 更新按钮点击事件
+            $('#updateBtn').click(function() {
+                const formData = $('#updateForm').serialize();
+
+                // 更新数据的 AJAX 请求
+                $.ajax({
+                    url: '/api/updateData', // 替换为实际的数据更新接口
+                    method: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        alert('更新成功');
+                        window.location.href = `index.html?page=${currentPage}`;
+                    },
+                    error: function(err) {
+                        console.error('更新失败', err);
+                    }
+                });
+            });
+        });
+    </script>
+
+{% endblock javascripts %}

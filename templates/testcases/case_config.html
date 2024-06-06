@@ -1,0 +1,558 @@
+{% extends "layouts/base.html" %}
+{% load project_extras static %}
+{% block title %} 用例配置 {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+
+    <style>
+        .table {
+            table-layout: fixed;
+            width: 100%;
+        }
+    </style>
+{% endblock stylesheets %}
+{% block content %}
+    <div class="pcoded-content">
+        <div class="pcoded-inner-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <div class="main-body">
+                <div class="page-wrapper">
+                    <!-- [ Main Content ] start -->
+                    <div class="row">
+                        <!-- [ basic-table ] start -->
+                        <div class="col-xl-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><span><i class="feather icon-home">  <a
+                                            href="{% url 'index' %}">首页</a></i></span>
+                                    </h5>
+                                    <span><i class="fa fa-map-marker"></i> 配置文件列表</span>
+                                </div>
+
+                                <div id= 'prolist' style="display: block" class="card-block">
+                                    <div class='row'>
+                                        <div class="col-8">
+                                            <div class="col-6">
+                                                <div class="btn-group ">
+                                                        <button id='upload_template_btn' class="btn btn-light" data-toggle="modal"
+                                                                aria-haspopup="true" aria-expanded="false" style="display: block"
+                                                                data-target="#upload_config_modal">上传配置文件
+                                                        </button>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-4">
+                                            <form class="form-inline mb-2">
+                                                <div class="form-group mx-sm-3 mb-2">
+                                                    <input type="text"
+                                                           class="form-control"
+                                                           name="search" ,
+                                                           id='search' ,
+                                                           placeholder="配置文件名称" ,
+                                                           value=>
+                                                </div>
+                                                <button type="submit" class="btn btn-secondary mb-2 btn-sm">搜索(功能暂未实现)</button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    <!--所有项目-->
+                                    <div id='allconfigs' style="display: block" class="table-responsive ">
+                                        <table id='config_template_table' class="table table-striped">
+                                        </table>
+
+
+{#                                        <table class="table table-striped">#}
+{#                                            <thead>#}
+{#                                            <tr>#}
+{#                                                <th>编号</th>#}
+{#                                                <th>配置文件名称</th>#}
+{#                                                <th>配置文件类型</th>#}
+{#                                                <th>最近修改时间</th>#}
+{#                                                <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;操作</th>#}
+{#                                            </tr>#}
+{#                                            </thead>#}
+{#                                            <tbody>#}
+{#                                            </tbody>#}
+{#                                        </table>#}
+
+                                    </div>
+
+
+
+
+
+
+
+
+
+
+{#                                    <div class="row">#}
+{#                                        <div class='col-4'>#}
+{#                                            <a>合计 {{ count_total }} 条</a>#}
+{#                                        </div>#}
+{#                                        <div class='col-8'>#}
+{#                                            {% show_pagination %}#}
+{#                                        </div>#}
+{#                                        <div class='col-8'>#}
+{#                                        </div>#}
+{#                                    </div>#}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 更新用例模板 - 模态框 -->
+    <div class="modal fade" role="dialog" aria-hidden="true" id="update_config_modal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>请选择要上传的配置文件</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="fileUpdateForm">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="file">上传文件: </label>
+                            <input type="file" class="form-control file-loading" id="file2" name="file" accept=".xlsx, .xls, .xlsm">
+                            <input type="hidden" id='config_type' value="">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="upload_template('1')">更新</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 上传用例模板 - 模态框 -->
+    <div class="modal fade" role="dialog" aria-hidden="true" id="upload_config_modal" aria-labelledby="upload_config_modal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>请选择要上传的配置文件</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="fileUploadForm">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="file">上传文件: </label>
+                            <input type="file" class="form-control file-loading" id="file" name="file" accept=".xlsx, .xls, .xlsm">
+                        </div>
+                    </form>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th>
+                                    <label class="btn active">
+                                        <input type="radio" name="options" id="option1" autocomplete="off" value="WDBS" checked> 文档验证&环境部署
+                                    </label>
+                                </th>
+                                <th>
+                                    <label class="btn ">
+                                        <input type="radio" name="options" id="option2" autocomplete="off" value="TABLE"> 表定义
+                                    </label>
+                                </th>
+                                <th>
+                                    <label class="btn ">
+                                        <input type="radio" name="options" id="option3" autocomplete="off" value="VIEW"> 视图定义
+                                    </label>
+                                </th>
+                                <th>
+                                    <label class="btn ">
+                                        <input type="radio" name="options" id="option4" autocomplete="off" value="MACRO"> 宏定义
+                                    </label>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label class="btn active">
+                                        <input type="radio" name="options" id="option5" autocomplete="off" value="FUNCTION"> 函数定义
+                                    </label>
+                                </th>
+                                <th>
+                                    <label class="btn ">
+                                        <input type="radio" name="options" id="option6" autocomplete="off" value="PROC"> 存储过程定义
+                                    </label>
+                                </th>
+                                <th>
+                                    <label class="btn ">
+                                        <input type="radio" name="options" id="option7" autocomplete="off" value="JKFW"> 对外接口服务
+                                    </label>
+                                </th>
+                                <th>
+                                    <label class="btn ">
+                                        <input type="radio" name="options" id="option8" autocomplete="off" value="AUTO"> Automation任务
+                                    </label>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label class="btn ">
+                                        <input type="radio" name="options" id="option9" autocomplete="off" value="MON"> 统一监控
+                                    </label>
+                                </th>
+                                <th>
+                                    <label class="btn ">
+                                        <input type="radio" name="options" id="option10" autocomplete="off" value="QDGN"> 前端功能页面
+                                    </label>
+                                </th>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="upload_template('0')">上传</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除模板 - 模态框 -->
+    <div class="modal fade" id="delete_config_modal" tabindex="-1" role="dialog" aria-labelledby="delete_config_modal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">确认删除？</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    确定要执行删除操作吗？这个操作无法撤销。
+                    <input type="hidden" id='delete_config_type' value="">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="delete_config_file()">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+    <script type="text/javascript">
+
+        document.addEventListener('touchstart', function(e) {
+            console.log('touchmove event triggered===========================');
+            e.preventDefault();
+        }, { passive: false, capture: true });
+
+        {#let list1 = {{ data }};//这里一直无法解析“”，解决办法：先跳转到这个页面，然后发送ajax，查数据库数据返回#}
+        {#console.log(list1);#}
+        get_config_data();
+        let data_list = [];
+        function get_config_data(){
+            $('#config_template_table').bootstrapTable('destroy').bootstrapTable({
+                url: '{% url 'testcases:config_data' %}',
+                method: 'post',
+                dataType: 'json',
+                striped: true,
+                pagination: true,
+                sidePagination: 'server',
+                pageNumber: 1,
+                pageSize: 2,
+                pageList: [10, 20, 30],
+                paginationPreText: '上一页',
+                paginationNextText: '下一页',
+                locale: 'zh-CN',
+                queryParams: function (params) {
+                    return {
+                        tags: '0',
+                        offset: params.offset,
+                        limit: params.limit, //即pageSize
+                    }
+                },
+                columns: [
+                    [
+                        {
+                            field: 'id',
+                            title: '编号',
+                            align: 'center',
+                            width: 300
+                        },
+                        {
+                            field: 'config_file_name',
+                            title: '配置文件名称',
+                            align: 'center',
+                            class:'tooltip-show',
+                            cellStyle: {
+                                css: {
+                                    "overflow": "hidden",
+                                    "text-overflow": "ellipsis",
+                                    "white-space": "nowrap"
+                                }
+                            },
+                            width: 5,
+                        },
+                        {
+                            field: 'config_file_type',
+                            title: '配置文件类型',
+                            align: 'center',
+                            cellStyle: {
+                                css: {
+                                    "overflow": "hidden",
+                                    "text-overflow": "ellipsis",
+                                    "white-space": "nowrap"
+                                }
+                            },
+                            width: 100
+                        },
+                        {
+                            field: 'batch_time',
+                            title: '最近修改时间',
+                            align: 'center',
+                            width: 160
+                        },
+                        {
+                            field: '',
+                            title: '操作',
+                            align: 'center',
+                            width: 160,
+                            formatter: function (value, row, index) {
+                                console.log(JSON.stringify(row));
+                                {#let edit = `<button class="btn btn-primary" onclick="download_config_template_file('${row.config_file_type}')">下载</button>`;#}
+                                let edit = `<a href="#" onclick="download_config_template_file('${row.config_file_type}')" title="下载"><i class="fas fa-download fa-lg"></i></a>`;
+                                {#edit += `<button class="btn btn-success" onclick="show_update_modal('${row.config_file_type}')" data-toggle="modal" data-target="#update_config_modal">更新</button>`;#}
+                                edit += `<a href="#" onclick="show_update_modal('${row.config_file_type}')"  data-toggle="modal" data-target="#update_config_modal" title="编辑" class="ml-3">
+            <i class="fas fa-edit fa-lg"></i></a>`;
+                                {#edit += `<button class="btn btn-danger" onclick="show_delete_modal('${row.config_file_type}')" data-toggle="modal" data-target="#delete_config_modal">删除</button>`;#}
+                                edit += `<a href="#" onclick="show_delete_modal('${row.config_file_type}')" data-toggle="modal" data-target="#delete_config_modal" title="删除" class="ml-3">
+            <i class="fas fa-trash-alt fa-lg"></i></a>`;
+                                edit += `<a href="#" onclick="copy_string('${encodeURIComponent(row.config_file_name)}')" title="复制" class="ml-3">
+            <i class="fas fa-copy fa-lg"></i></a>`;
+                                edit += `<a href="#" onclick="handleShowUpdate(${index})" title="编辑" class="ml-3"><i class="fas fa-edit fa-lg"></i></a>`;
+                                return edit;
+                            }
+                        }
+                    ]
+                ],
+                rowStyle: function (row, index) {
+                    return {
+                        css: {
+                            "height": "5px",  // Adjust this value as needed
+                            "line-height": "5px",  // Ensure content is vertically centered
+                            "vertical-align": "middle"
+                        }
+                    };
+                }
+            })
+        }
+        $('.tooltip-show').tooltip('show');
+        function copy_string(query_string) {
+             // 创建一个临时的文本域元素
+            var tempTextarea = document.createElement('textarea');
+            // 设置文本域的内容为要复制的字符串
+            tempTextarea.value = decodeURIComponent(query_string);
+            // 将文本域元素添加到页面中
+            document.body.appendChild(tempTextarea);
+            // 选中文本域中的内容
+            tempTextarea.select();
+            // 尝试执行复制操作
+            var successful = document.execCommand('copy');
+            // 移除临时的文本域元素
+            document.body.removeChild(tempTextarea);
+            // 如果复制成功，则弹窗提示
+            if (successful) {
+                alert('复制成功！');
+            } else {
+                alert('复制失败！');
+            }
+
+        }
+
+        function get_config_data_bak(){
+            $.ajax({
+            type: "post",
+            url: "{% url 'testcases:config_data' %}",
+            data: JSON.stringify({"tags": '0'}),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            headers: {"X-CSRFToken": $('[name="csrfmiddlewaretoken"]').val()},
+            success: function (result) {
+                if (result.code === 200) {
+                    data_list = result.data;
+                    //渲染table
+                    render_config_template_table();
+                } else{
+                    bootbox.alert({
+                        message: '配置文件接口请求失败！',
+                        size: 'small'
+                    });
+                }
+            }
+            });
+        }
+
+        function render_config_template_table(){
+            let index = 0;
+            let config_template_table = document.getElementById('config_template_table');
+            let trHtml = '';
+            trHtml = "<thead>" +
+                        "<tr>" +
+                "               <th class='text-center text-dark'>"+"编号"+"</th>" +
+                "               <th class='text-center text-dark'>"+"配置文件名称"+"</th>" +
+                "               <th class='text-center text-dark'>"+"配置文件类型"+"</th>" +
+                "               <th class='text-center text-dark'>"+"最近修改时间"+"</th>" +
+                "               <th class='text-center text-dark'>"+"操作"+"</th>" +
+                    "</tr></thead>"
+            trHtml += '<tbody>'
+            for(let item of data_list){
+                index += 1;
+                trHtml += '<tr>';
+                trHtml += '<td class=\'text-center\'>'+index+'</td>';
+                trHtml += '<td class=\'text-center\'>'+item.config_name+'</td>';
+                trHtml += '<td class=\'text-center\'>'+item.config_type+'</td>';
+                trHtml += '<td class=\'text-center\'>'+item.batch_time+'</td>';
+                trHtml += '<td class=\'text-center\'><button class="btn btn-primary" onclick="download_config_template_file(\''+item.config_type+'\')">下载</button>' +
+                    '<button class="btn btn-success" onclick="show_update_modal(\''+item.config_type+'\')" data-toggle="modal" data-target="#update_config_modal">更新</button>'+
+                    '<button class="btn btn-danger" onclick="show_delete_modal(\''+item.config_type+'\')" data-toggle="modal" data-target="#delete_config_modal">删除</button>'+'</td>';
+                trHtml += '</tr>';
+            }
+            trHtml += '</tbody>';
+            config_template_table.innerHTML = trHtml;
+        }
+
+        function upload_template(insert_update_flag){
+            var file_element;
+            var file_type;
+            if(insert_update_flag === '0'){ //upload
+                file_element = 'file';
+                //获取单选按钮组
+                var radioButton = document.querySelector('input[type="radio"]:checked');
+                file_type = radioButton.value;
+            }else{ //update
+                file_element = 'file2';
+                file_type = document.getElementById('config_type').value;
+            }
+            var fileInput = document.getElementById(file_element);
+            var file = fileInput.files[0];
+            // 创建 FormData 对象
+            var formData = new FormData();
+            formData.append("file", file);
+            formData.append("file_type", file_type);
+            formData.append("insert_update_flag", insert_update_flag);
+            $.ajax({
+                type:"POST",
+                url:"{% url 'testcases:config_upload' %}",
+                data: formData,
+                contentType: false,
+                processData: false,
+                headers: {"X-CSRFToken": $('[name="csrfmiddlewaretoken"]').val()},
+                success: function (result) {
+                    if (result.code == 0){
+                        if(insert_update_flag === '0'){
+                            msg = '文件上传成功！';
+                        }else{
+                            msg = '文件更新成功！';
+                        }
+                    }else{
+                        msg = result.message;
+                    }
+                    bootbox.alert({
+                        message: msg,
+                        size: 'small'
+                    });
+                    //刷新table
+                    get_config_data()
+                },
+                error:function () {
+                    bootbox.alert({
+                        message: '配置文件接口请求失败！',
+                        size: 'small'
+                    });
+                 }
+            })
+            if(insert_update_flag === '0'){ //upload模态框
+                $('#upload_config_modal').modal('hide');
+            }else{ //update模态框
+                $('#update_config_modal').modal('hide');
+            }
+        }
+        //删除配置文件
+        function delete_config_file() {
+            var config_type = document.getElementById('delete_config_type').value;
+            $.ajax({
+                type:"POST",
+                url:"{% url 'testcases:config_delete_file' %}",
+                data: JSON.stringify({"config_type": config_type}),
+                contentType: false,
+                processData: false,
+                headers: {"X-CSRFToken": $('[name="csrfmiddlewaretoken"]').val()},
+                success: function (result) {
+                    bootbox.alert({
+                        message: result.message,
+                        size: 'small'
+                    });
+                    //刷新table
+                    get_config_data()
+                },
+                error:function () {
+                    bootbox.alert({
+                        message: '用例模板接口请求失败！',
+                        size: 'small'
+                    });
+                 }
+            })
+             $('#delete_config_modal').modal('hide');
+        }
+
+        //传给模态框
+        function show_update_modal(type) {
+            var myInput = document.getElementById('config_type');
+            myInput.value = type;
+        }
+        //传给删除模态框
+        function show_delete_modal(type) {
+            var myInput = document.getElementById('delete_config_type');
+            myInput.value = type;
+        }
+        //下载文件
+        function download_config_template_file(config_type){
+            window.open("/testcases/download_config_template_file?config_type=" + config_type);
+            //window.open("/testcases/download_test");
+        }
+        function handleShowUpdate(index) {
+
+            var row = $('#config_template_table').bootstrapTable('getData')[index];
+            var rowDataJson = JSON.stringify(row);
+            console.log(rowDataJson);
+        }
+
+        var aaa = {
+    "config_file_name": "文档验证&环境部署.xlsx",
+    "config_file_path": "文档验证&环境部署.xlsx",
+    "config_file_type": "WDBS",
+    "batch_time": "2023-10-21T22:00:30",
+    "tags": "0",
+    "data_uuid": null,
+    "id": 1
+};
+        var bbb = JSON.stringify(aaa);
+        console.log(bbb);
+    </script>
+
+{% endblock javascripts %}

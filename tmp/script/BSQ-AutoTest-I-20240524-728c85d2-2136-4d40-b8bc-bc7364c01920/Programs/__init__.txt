@@ -1,0 +1,6 @@
+*** Settings ***
+Suite Setup		Run Keywords	登录
+...				AND		进入应用系统	业务统计查询系统
+Suite Teardown	Run Keywords	退出应用系统	业务统计查询系统
+...				AND		退出
+Resource		自定义用户关键字/公用关键字.robot

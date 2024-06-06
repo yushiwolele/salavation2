@@ -1,0 +1,150 @@
+<nav class="pcoded-navbar">
+    <div class="navbar-wrapper">
+        <div class="navbar-brand header-logo">
+            <a target="_blank"
+               href="" class="b-brand">
+                <div class="b-bg">
+                    <i class="feather icon-trending-up"></i>
+                </div>
+                <span class="b-title">自动化平台</span>
+            </a>
+            <a class="mobile-menu" id="mobile-collapse" href="javascript:"><span></span></a>
+        </div>
+        <div class="navbar-content scroll-div">
+            <ul class="nav pcoded-inner-navbar">
+
+                <li data-username="dashboard Default Ecommerce CRM Analytics Crypto Project"
+                    class="nav-item ">
+                    <a href="{% url 'index' %}" class="nav-link "><span class="pcoded-micon"><i
+                            class="feather icon-home"></i></span><span class="pcoded-mtext">首页</span></a>
+                </li>
+
+                {% if user.is_superuser %}  <!-- 管理员权限 -->
+                    <li class="nav-item ">
+                        <a href="{% url 'userlist' %}" class="nav-link ">
+                        <span class="pcoded-micon"><i
+                                class="fa fa-users"></i>
+                    </span>
+                            <span class="pcoded-mtext">用户管理</span></a>
+                    </li>
+                {% endif %}
+
+
+                <!-- 项目管理 -->
+
+{#                <li class="nav-item pcoded-hasmenu ">#}
+{#                    <a href="javascript:" class="nav-link "><span class="pcoded-micon"><i class="feather icon-box"></i></span><span#}
+{#                            class="pcoded-mtext">项目管理</span></a>#}
+{#                    <ul class="pcoded-submenu">#}
+{#                            <li>#}
+{#                                <a><span class="pcoded-mtext">变量管理#}
+{#                                    <ul class="pcoded-submenu">#}
+{#                                        <li class=""><a class=""  href="{% url 'devlist' %}" >公共变量</a></li>#}
+{#                                        <li class=""><a class="" href="{% url 'enviroment_bianliang' %}">环境变量</a></li>#}
+{#                                        <li class=""><a class="" href="{% url 'zidingyi_bianliang' %}">自定义变量</a></li>#}
+{#                                    </ul>#}
+{#                                </span></a>#}
+{#                            </li>#}
+{#                        <li class=""><a href="{% url 'modulelist' %}" class="">模块信息</a></li>#}
+{#                        <li class=""><a href="{% url 'prlist' %}" class="">项目信息</a></li>#}
+{##}
+{#                    </ul>#}
+{#                </li>#}
+
+                <!-- Management Category -->
+
+                <li class="nav-item pcoded-hasmenu ">
+                    <a href="javascript:" class="nav-link "><span class="pcoded-micon"><i class="fa fa-bars"></i></span><span
+                            class="pcoded-mtext">用例管理</span></a>
+
+                    <ul class="pcoded-submenu">
+
+{#                        <li class="nav-item pcoded-hasmenu ">#}
+{#                            <a href="javascript:" class="nav-link "><span class="pcoded-mtext">用例文件</span></a>#}
+{#                            <ul class="pcoded-submenu">#}
+{#                                <li class=""><a href="{% url 'testcases:case' %}" class="">配置文件</a></li>#}
+{#                                <li class=""><a href="{% url 'testcases:template' %}" class="">模板文件</a></li>#}
+{#                            </ul>#}
+{#                        </li>#}
+{##}
+{#                        <li class="nav-item pcoded-hasmenu ">#}
+{#                            <a href="javascript:" class="nav-link "><span class="pcoded-mtext">脚本文件</span></a>#}
+{#                            <ul class="pcoded-submenu">#}
+{#                                <li class=""><a href="{% url 'testcases:case' %}" class="">基线包</a></li>#}
+{#                                <li class=""><a href="{% url 'testcases:template' %}" class="">测试套件</a></li>#}
+{#                            </ul>#}
+{#                        </li>#}
+
+                        <li class=""><a href="{% url 'testcases:testcase_config' %}" class="">用例配置文件</a></li>
+                        <li class=""><a href="{% url 'testcases:testcase_template' %}" class="">用例模板文件</a></li>
+{#                        <li class=""><a href="" class="">拆分用例配置文件</a></li>#}
+{#                        <li class=""><a href="" class="">测试用例库</a></li>#}
+                        <li class=""><a href="{% url 'testcases:script_config' %}" class="">脚本测试套件</a></li>
+                        <li class=""><a href="{% url 'testcases:script_baseline' %}" class="">脚本基线包</a></li>
+                        <li class=""><a href="{% url 'testcases:related' %}" class="">相关操作</a></li>
+                    </ul>
+
+                </li>
+
+{#                <li class="nav-item pcoded-hasmenu ">#}
+{#                    <a href="javascript:" class="nav-link "><span class="pcoded-micon"><i#}
+{#                            class="fa fa-tasks"></i></span><span#}
+{#                            class="pcoded-mtext">任务管理</span></a>#}
+{#                    <ul class="pcoded-submenu">#}
+{#                        <li class=""><a href="{% url 'checklist' %}" class="">任务详情</a></li>#}
+{#                    </ul>#}
+{#                </li>#}
+
+{#                <li class="nav-item pcoded-hasmenu ">#}
+{#                    <a href="javascript:" class="nav-link "><span class="pcoded-micon"><i#}
+{#                            class="fa fa-tasks"></i></span><span#}
+{#                            class="pcoded-mtext">工具合集</span></a>#}
+{#                    <ul class="pcoded-submenu">#}
+{#                        <li class=""><a href="{% url 'checklist' %}" class="">dependency-(安全扫描)</a></li>#}
+{#                        <li class=""><a href="{% url 'xraylist' %}" class="">Xray-(sql注入扫描)</a></li>#}
+{#                        <li class=""><a href="{% url 'aes' %}" class="">加解密</a></li>#}
+{#                        <li class=""><a href="{% url 'ftp' %}" class="">FTP文件下载</a></li>#}
+{#                    </ul>#}
+{##}
+{#                </li>#}
+
+{#                <li class="nav-item ">#}
+{#                    <a href="" class="nav-link ">#}
+{#                        <span class="pcoded-micon">#}
+{#                            <i class="fa fa-bookmark"></i>#}
+{#                        </span><span class="pcoded-mtext">记录操作 </span></a>#}
+{#                </li>#}
+
+{#                {% if user.is_superuser %}  <!-- 管理员权限 -->#}
+{#                    <li class="nav-item ">#}
+{#                        <a href="/admin/" class="nav-link ">#}
+{#                        <span class="pcoded-micon"><i#}
+{#                                class="fas fa-shield-alt"></i>#}
+{#                    </span>#}
+{#                            <span class="pcoded-mtext">后台管理（待完善）</span></a>#}
+{#                    </li>#}
+{#                {% endif %}#}
+
+
+
+                <li data-username="Disabled Menu" class="nav-item">
+                    <a href="{% url 'testcases:test_query' %}" class="nav-link">
+                        <span class="pcoded-micon"><i class="feather icon-box"></i></span><span class="pcoded-mtext">test查询页</span>
+                    </a>
+                </li>
+
+
+
+
+
+                <li data-username="Disabled Menu" class="nav-item">
+                    <a href="{% url 'logout' %}" class="nav-link">
+                        <span class="pcoded-micon"><i class="feather icon-power"></i></span><span class="pcoded-mtext">Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+

@@ -1,0 +1,116 @@
+Metadata-Version: 2.0
+Name: robotframework-selenium2screenshots
+Version: 0.8.1
+Summary: Robot Framework keyword library for capturing annotated screenshots with Selenium2Library
+Home-page: https://github.com/datakurre/robotframework-selenium2screenshots/
+Author: Asko Soukka
+Author-email: asko.soukka@iki.fi
+License: GPL
+Description-Content-Type: UNKNOWN
+Platform: UNKNOWN
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Requires-Dist: setuptools
+Requires-Dist: robotframework (>=3.0.2)
+Requires-Dist: robotframework-selenium2library (>=3.0.0b1)
+Provides-Extra: PIL
+Requires-Dist: PIL; extra == 'PIL'
+Provides-Extra: Pillow
+Requires-Dist: Pillow; extra == 'Pillow'
+Provides-Extra: docs
+Requires-Dist: Sphinx; extra == 'docs'
+Requires-Dist: Pillow; extra == 'docs'
+Requires-Dist: sphinxcontrib-robotframework; extra == 'docs'
+
+Selenium2Screenshots-library for Robot Framework
+================================================
+
+`Read the docs for more detailed information.`__
+
+__ https://robotframework-selenium2screenshots.readthedocs.org/
+
+Changelog
+=========
+
+0.8.1 (2018-03-27)
+------------------
+
+- Fix issue where naive string conversion generated broken
+  JavaScript on Python 2 [fixes #12]
+  [Asko Soukka]
+
+
+0.8.0 (2017-12-05)
+------------------
+
+- Depend on newest versions of Robot Framework and Selenium2Library
+  [tomgross]
+- Fix issue where keyword ``Capture and crop page screenshot`` when
+  bounding box selector ended with letter 'u'
+  [flohcim]
+- Fix to limit cropped screenshots by browser window's width
+  [pgfrunewald]
+
+0.7.2 (2016-10-22)
+------------------
+
+- Fixed issue where Bootstrap jQuery -keyword didn't wait for jQuery
+  to be available (credits to @leorochael)
+  [datakurre]
+
+0.7.0 (2016-06-16)
+------------------
+
+- Added positioning for pointer and customization for Highlight. solves #3
+  [iham]
+
+0.6.0 (2015-05-20)
+------------------
+
+- Add support for Python 3
+  [vincentfretin]
+
+0.5.0 (2014-07-16)
+------------------
+
+- Add 'Highlight' and 'Clear highlight' keywords
+  [datakurre]
+
+0.4.0 (2013-09-21)
+------------------
+
+- Add 'Bootstrap jQuery'-keyword to add jQuery into the current page
+  [datakurre]
+
+0.3.1 (2013-09-20)
+------------------
+
+- Fix issues with pointy note
+  [datakurre]
+
+0.3.0 (2013-09-20)
+------------------
+
+- Add pointy note annotation
+  [datakurre]
+
+0.2.1 (2013-09-19)
+------------------
+
+- Fixed packaging.
+
+
+0.2.0 (2013-09-19)
+------------------
+
+- Documentation updated.
+
+0.1.0 (2013-09-17)
+------------------
+
+- First release.
+
+
