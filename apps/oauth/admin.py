@@ -2,9 +2,7 @@
 from django.contrib import admin
 from oauth.models import Users, Department, Position
 from django.contrib.auth.admin import UserAdmin
-
-admin.site.site_title = "Salvation后台管理"
-admin.site.site_header = "Salvation后台管理"
+#from apps.customadmin.admin import CustomAdminSite
 
 
 # @admin.register(Department)
@@ -47,9 +45,6 @@ class UsersAdmin(UserAdmin):
         ('个人详情', {'fields': ('name','gender','dep','mobile','birthday', )}),
     )
 
-#
-    # add_fieldsets = (
-    #     (None, {u'fields': (
-    #         'username', 'password1', 'password2', 'first_name', 'name', 'gender', 'dep', 'post', 'birthday', 'mobile',
-    #         'email', 'is_superuser', 'is_staff',
-    #         'is_active',)}),)
+admin.site.site_header = '自动化测试1111111'
+admin.site.site_title = '自动化测试2222'
+admin.site.index_title = '自动化测3333'

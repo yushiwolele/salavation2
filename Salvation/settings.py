@@ -36,10 +36,12 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 AUTH_USER_MODEL = "oauth.Users"
 # Application definition
+sys.path.insert(0,os.path.join(BASE_DIR, 'extra_apps'))
 
 INSTALLED_APPS = [
     'simpleui',
     'django.contrib.admin',
+    #'customadmin.apps.CustomAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -53,13 +55,15 @@ INSTALLED_APPS = [
     'django_celery_beat',  # 定时任务
     #'django_celery_results',  # 查看 celery 执行结果
     'rest_framework.authtoken',
-    'django_filters',
     'oauth',
+    'customadmin',
     'testcases',
     'channels',
-    'debug_toolbar'
+    'debug_toolbar',
+
 
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -71,6 +75,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
 ]
 INTERNAL_IPS = [
     '127.0.0.1',
@@ -159,6 +164,11 @@ USE_L10N = True
 
 USE_TZ = False
 
+SIMPLEUI_HOME_INFO = False
+SIMPLEUI_ANALYSIS = False
+SIMPLEUI_HOME_TITLE = '首页111'
+SIMPLEUI_HOME_QUICK = False
+SIMPLEUI_HOME_ACTION = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
@@ -282,3 +292,101 @@ LOGGING = {
     # },
 }
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+SIMPLEUI_CONFIG = {
+    # 是否使用系统默认菜单。
+    'system_keep': False,
+
+    # 用于菜单排序和过滤, 不填此字段为默认排序和全部显示。 空列表[] 为全部不显示.
+    'menu_display': ["周期任务","用户管理","系统目录结构管理","文件类型管理"],
+
+    # 设置是否开启动态菜单, 默认为False. 如果开启, 则会在每次用户登陆时刷新展示菜单内容。
+    # 一般建议关闭。
+    'dynamic': False,
+    'menus': [
+        # {
+        #     'app': 'auth',
+        #     'name': '权限认证',
+        #     'icon': 'fas fa-user-shield',
+        #     'models': [
+        #         {
+        #             'name': '用户列表',
+        #             'icon': 'fa fa-user',
+        #             ## 注意url按'/admin/应用名小写/模型名小写/'命名。   /admin/oauth/users/
+        #             'url': '/admin/oauth/users/'
+        #         },
+        #         {
+        #             'name': '用户组',
+        #             'icon': 'fa fa-th-list',
+        #             'url': 'auth/group/'
+        #         }
+        #     ]
+        # },
+        {
+            'name': '用户管理',
+            'icon': 'fa fa-user',
+            ## 注意url按'/admin/应用名小写/模型名小写/'命名。   /admin/oauth/users/
+            'url': '/admin/oauth/users/'
+         },
+        # {
+        #     'name': '任务管理',
+        #     'icon': 'fa fa-th-list',
+        #     'models': [
+        #         {
+        #             'name': '任务列表',
+        #             # 注意url按'/admin/应用名小写/模型名小写/'命名。
+        #             'url': '/admin/tasks/task/',
+        #             'icon': 'fa fa-tasks'
+        #         },
+        #     ]
+        # },
+        {
+            'name': '周期任务',
+            'icon': 'fa fa-th-list',
+            'models': [
+                {
+                    'name': '周期性任务',
+                    # 注意url按'/admin/应用名小写/模型名小写/'命名。
+                    'url': '/admin/django_celery_beat/periodictask/',
+                    'icon': 'fa fa-tasks'
+                },
+                {
+                    'name': '定时',
+                    # 注意url按'/admin/应用名小写/模型名小写/'命名。
+                    'url': '/admin/django_celery_beat/clockedschedule/',
+                    'icon': 'fa fa-tasks'
+                },
+                {
+                    'name': '日程事件',
+                    # 注意url按'/admin/应用名小写/模型名小写/'命名。
+                    'url': '/admin/django_celery_beat/solarschedule/',
+                    'icon': 'fa fa-tasks'
+                },
+                {
+                    'name': '计划任务',
+                    # 注意url按'/admin/应用名小写/模型名小写/'命名。
+                    'url': '/admin/django_celery_beat/crontabschedule/',
+                    'icon': 'fa fa-tasks'
+                },
+                {
+                    'name': '间隔',
+                    # 注意url按'/admin/应用名小写/模型名小写/'命名。
+                    'url': '/admin/django_celery_beat/intervalschedule/',
+                    'icon': 'fa fa-tasks'
+                },
+            ]
+        },
+       {
+           'name': '系统目录结构管理',
+           # 注意url按'/admin/应用名小写/模型名小写/'命名。
+           'url': '/admin/customadmin/systemcontent/',
+           'icon': 'fa fa-tasks'
+       },
+        {
+           'name': '文件类型管理',
+           # 注意url按'/admin/应用名小写/模型名小写/'命名。
+           'url': '/admin/customadmin/filetype/',
+           'icon': 'fa fa-tasks'
+       },
+    ]
+}

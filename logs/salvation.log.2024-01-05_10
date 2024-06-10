@@ -1,4 +1,0 @@
-[ERROR][2024-01-05 10:03:55,790][runTestCases_service.py:114]--报错信息：FileNotFoundError(2, 'No such file or directory'),报错的行号:110
-[ERROR][2024-01-05 10:10:06,105][runTestCases_service.py:114]--报错信息：FileNotFoundError(2, 'No such file or directory'),报错的行号:110
-[ERROR][2024-01-05 10:15:12,445][runTestCases_service.py:114]--报错信息：FileNotFoundError(2, 'No such file or directory'),报错的行号:110
-[ERROR][2024-01-05 10:41:15,441][runTestCases_service.py:118]--报错信息：FileNotFoundError(2, 'No such file or directory'),报错的行号:114
