@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import RunningProcessInfo,SystemContent,FileType
-#thisis a test
+
+#thisisatest
 @admin.register(RunningProcessInfo)
 class CustomAdminAdmin(admin.ModelAdmin):
     """
