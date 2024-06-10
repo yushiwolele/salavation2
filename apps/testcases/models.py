@@ -42,7 +42,16 @@ class RanScriptResultModel(models.Model):
         db_table = 'testcase_ran_script_result'
 
 
-
+class ManageToolDataFileModel(models.Model):
+    '''
+    数据文件表
+    '''
+    system_conten_id = models.IntegerField('数据结构表id', null=True)
+    file_type_id = models.IntegerField('文件类型表id', null=True)
+    file_path = models.TextField('文件路径', null=True)
+    update_time = models.DateTimeField('更新时间', null=True)
+    class Meta:
+        db_table = 'managetool_data_file'
 
 
 

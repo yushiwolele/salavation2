@@ -19,15 +19,15 @@
                             class="feather icon-home"></i></span><span class="pcoded-mtext">首页</span></a>
                 </li>
 
-                {% if user.is_superuser %}  <!-- 管理员权限 -->
-                    <li class="nav-item ">
-                        <a href="{% url 'userlist' %}" class="nav-link ">
-                        <span class="pcoded-micon"><i
-                                class="fa fa-users"></i>
-                    </span>
-                            <span class="pcoded-mtext">用户管理</span></a>
-                    </li>
-                {% endif %}
+{#                {% if user.is_superuser %}  <!-- 管理员权限 -->#}
+{#                    <li class="nav-item ">#}
+{#                        <a href="{% url 'userlist' %}" class="nav-link ">#}
+{#                        <span class="pcoded-micon"><i#}
+{#                                class="fa fa-users"></i>#}
+{#                    </span>#}
+{#                            <span class="pcoded-mtext">用户管理</span></a>#}
+{#                    </li>#}
+{#                {% endif %}#}
 
 
                 <!-- 项目管理 -->
@@ -82,6 +82,7 @@
                         <li class=""><a href="{% url 'testcases:script_config' %}" class="">脚本测试套件</a></li>
                         <li class=""><a href="{% url 'testcases:script_baseline' %}" class="">脚本基线包</a></li>
                         <li class=""><a href="{% url 'testcases:related' %}" class="">相关操作</a></li>
+                        <li class=""><a href="{% url 'testcases:managetool_data_file_page' %}" class="">数据文件</a></li>
                     </ul>
 
                 </li>

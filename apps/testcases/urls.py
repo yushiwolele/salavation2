@@ -1,6 +1,6 @@
 from django.urls import path
 
-from testcases.views import config_views,operation_views,script_views,test_query_views
+from testcases.views import config_views,operation_views,script_views,test_query_views,managetool_data_file_views
 
 app_name = 'testcases'
 urlpatterns=[
@@ -42,4 +42,10 @@ urlpatterns=[
 
     #测试查询
     path('test_query/', test_query_views.test_query, name='test_query'),
+
+    path('managetool_data_file_page/', managetool_data_file_views.managetool_data_file_page_view, name='managetool_data_file_page'),
+    path('managetool_data_file_get_data/', managetool_data_file_views.managetool_data_file_get_data_view, name='managetool_data_file_get_data'),
+    path('managetool_data_file_getall_structure_filetype/', managetool_data_file_views.managetool_data_file_getall_structure_filetype_view, name='managetool_data_file_getall_structure_filetype'),
+    path('managetool_data_file_add_page/', managetool_data_file_views.managetool_data_file_add_page_view, name='managetool_data_file_add_page'),
+    path('managetool_data_file_preview_page/', managetool_data_file_views.managetool_data_file_preview_page_view, name='managetool_data_file_preview_page'),
 ]
