@@ -1,0 +1,245 @@
+{% extends "layouts/base.html" %}
+{% load project_extras static %}
+{% load custom_filters %}
+{% block title %} 数据文件 {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+    <link href="{% static 'admin/css/custom.css' %}" rel="stylesheet">
+
+    <style>
+        {#.table {#}
+        {#    table-layout: fixed;#}
+        {#    width: 100%;#}
+        {# }#}
+        .custom-header-class .th-inner {
+            color: rgba(128, 234, 248, 0.8); /* 改变文本颜色 */
+        }
+    </style>
+{% endblock stylesheets %}
+{% block content %}
+    <div class="pcoded-content">
+        <div class="pcoded-inner-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <div class="main-body">
+                <div class="page-wrapper">
+                    <!-- [ Main Content ] start -->
+                    <div class="row">
+                        <!-- [ basic-table ] start -->
+                        <div class="col-xl-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><span><i class="feather icon-home">  <a
+                                            href="{% url 'index' %}">首页</a></i></span>
+                                    </h5>
+                                    <span><i class="fa fa-map-marker"></i> 数据文件新增</span>
+                                </div>
+
+                                <div id= 'prolist' style="display: block" class="card-block">
+                                    <div id='alldatafiles' style="display: block" class="table-responsive ">
+                                        <form id="addForm">
+                                            <div class="form-group">
+                                                <label for="systemName">系统名称</label>
+                                                <select class="select2 my_select_input " id="systemName" name="system_name" >
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="level1">一级目录</label>
+                                                <select class="select2 my_select_input " id="level1" name="level_1_name" >
+                                                    <option value="0">/</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="level2">二级目录</label>
+                                                <select class="select2 my_select_input " id="level2" name="level_2_name" disabled>
+                                                    <option value="0">/</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="level3">三级目录</label>
+                                                <select class="select2 my_select_input " id="level3" name="level_3_name" disabled>
+                                                    <option value="0">/</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="level4">四级目录</label>
+                                                <select class="select2 my_select_input " id="level4" name="level_4_name" disabled>
+                                                    <option value="0">/</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="functionName">功能名称</label>
+                                                <select class="select2 my_select_input " id="functionName" name="function_name" disabled>
+                                                    <option value="0">/</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="functionCode">功能编号</label>
+                                                <select class="select2 my_select_input " id="functionCode" name="function_code" disabled>
+                                                    <option value="0">/</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="importanceLevel ">重要级别</label>
+                                                <select class="select2 my_select_input " id="importanceLevel" name="importance_level">
+                                                    <option value="0">/</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="fileType">文件类型</label>
+                                                <select class="select2 my_select_input " id="fileType" name="file_type" >
+                                                    <option value="0">/</option>
+                                                </select>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="filePath">数据文件</label>
+                                                <input type="file" class="form-control" id="filePath" name="file_path">
+                                            </div>
+                                            <button type="button" class="btn btn-danger">
+{#                                                <i class="el-icon-delete"></i>#}
+                                                <span>取消</span>
+                                            </button>
+                                            <button type="button" class="btn btn-primary" onclick="go_data_file_add()">
+{#                                                <i class="el-icon-plus"></i>#}
+                                                <span>增加</span>
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+    <script type="text/javascript">
+        let systemStructures = {{ system_structures|to_js |safe }};
+        let fileTypes = {{ file_types|to_js|safe }};
+        let pagenum = {{ pagenum }};
+        let pagesize = {{ pagesize }};
+        // selectpicker 配置
+        {#$(".selectpicker").selectpicker({#}
+        {#    liveSearch: true,       // 允许模糊搜索#}
+        {#    selectOnTab: true,      // 允许键入空格或制表符#}
+        {#    selectAllText: '全选',#}
+        {#    deselectAllText: '取消全选',#}
+        {# });#}
+        // 初始化 Select2 并启用标签功能
+        $('.my_select_input').select2({
+            tags: true,
+            placeholder: "选择或输入文件类型",
+            allowClear: true,
+            //dropdownParent: $('#addModal')  // 将下拉列表附加到模态框内
+         });
+
+        get_structure_filetype_data();
+        //获取系统结构表和文件类型表
+        function get_structure_filetype_data(){
+             // 初始化文件类型选择框
+            fileTypes.forEach(ft => {
+                $('#fileType').append("<option value=" + ft.id + ">" + ft.filetype + "</option>");
+            });
+
+            // 初始化系统名称选择框
+            let systemNames = [...new Set(systemStructures.map(item => item.system_name))];
+            systemNames.forEach(systemName => {
+                $('#systemName').append(new Option(systemName, systemName));
+            });
+
+            // 绑定系统名称选择事件
+            $('#systemName').change(function () {
+                let selectedSystemName = $(this).val();
+                let filteredLevel1 = systemStructures.filter(item => item.system_name === selectedSystemName);
+
+                // 清空并重置下级选择框
+                $('#level1').empty().prop('disabled', filteredLevel1.length === 0);
+                $('#level2').empty().prop('disabled', true);
+                $('#level3').empty().prop('disabled', true);
+                $('#level4').empty().prop('disabled', true);
+
+                // 填充一级目录
+                let level1Names = [...new Set(filteredLevel1.map(item => item.level_1_name))];
+                level1Names.forEach(level1Name => {
+                    $('#level1').append(new Option(level1Name, level1Name));
+                });
+            });
+
+            // 绑定一级目录选择事件
+            $('#level1').change(function () {
+                let selectedSystemName = $('#systemName').val();
+                let selectedLevel1 = $(this).val();
+                let filteredLevel2 = systemStructures.filter(item => item.system_name === selectedSystemName && item.level_1_name === selectedLevel1);
+
+                // 清空并重置下级选择框
+                $('#level2').empty().prop('disabled', filteredLevel2.length === 0);
+                $('#level3').empty().prop('disabled', true);
+                $('#level4').empty().prop('disabled', true);
+
+                // 填充二级目录
+                let level2Names = [...new Set(filteredLevel2.map(item => item.level_2_name))];
+                level2Names.forEach(level2Name => {
+                    $('#level2').append(new Option(level2Name, level2Name));
+                });
+            });
+
+            // 绑定二级目录选择事件
+            $('#level2').change(function () {
+                let selectedSystemName = $('#systemName').val();
+                let selectedLevel1 = $('#level1').val();
+                let selectedLevel2 = $(this).val();
+                let filteredLevel3 = systemStructures.filter(item => item.system_name === selectedSystemName && item.level_1_name === selectedLevel1 && item.level_2_name === selectedLevel2);
+
+                // 清空并重置下级选择框
+                $('#level3').empty().prop('disabled', filteredLevel3.length === 0);
+                $('#level4').empty().prop('disabled', true);
+
+                // 填充三级目录
+                let level3Names = [...new Set(filteredLevel3.map(item => item.level_3_name))];
+                level3Names.forEach(level3Name => {
+                    $('#level3').append(new Option(level3Name, level3Name));
+                });
+            });
+
+            // 绑定三级目录选择事件
+            $('#level3').change(function () {
+                let selectedSystemName = $('#systemName').val();
+                let selectedLevel1 = $('#level1').val();
+                let selectedLevel2 = $('#level2').val();
+                let selectedLevel3 = $(this).val();
+                let filteredLevel4 = systemStructures.filter(item => item.system_name === selectedSystemName && item.level_1_name === selectedLevel1 && item.level_2_name === selectedLevel2 && item.level_3_name === selectedLevel3);
+
+                // 清空并重置下级选择框
+                $('#level4').empty().prop('disabled', filteredLevel4.length === 0);
+
+                // 填充四级目录
+                let level4Names = [...new Set(filteredLevel4.map(item => item.level_4_name))];
+                level4Names.forEach(level4Name => {
+                    $('#level4').append(new Option(level4Name, level4Name));
+                });
+            });
+
+        }
+    </script>
+
+{% endblock javascripts %}

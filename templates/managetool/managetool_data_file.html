@@ -1,0 +1,311 @@
+{% extends "layouts/base.html" %}
+{% load project_extras static %}
+{% block title %} 数据文件 {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+    <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/button.css">
+    <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/icon.css">
+
+    <style>
+        {#.table {#}
+        {#    table-layout: fixed;#}
+        {#    width: 100%;#}
+        {# }#}
+        .custom-header-class .th-inner {
+            color: rgba(128, 234, 248, 0.8); /* 改变文本颜色 */
+        }
+        .btn-group-right {
+            float: right;
+        }
+
+    </style>
+{% endblock stylesheets %}
+{% block content %}
+    <div class="pcoded-content">
+        <div class="pcoded-inner-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <div class="main-body">
+                <div class="page-wrapper">
+                    <!-- [ Main Content ] start -->
+                    <div class="row">
+                        <!-- [ basic-table ] start -->
+                        <div class="col-xl-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><span><i class="feather icon-home">  <a
+                                            href="{% url 'index' %}">首页</a></i></span>
+                                    </h5>
+                                    <span><i class="fa fa-map-marker"></i> 数据文件列表</span>
+                                </div>
+
+                                <div id= 'prolist' style="display: block" class="card-block">
+                                    <button type="button" class="el-button el-button--danger">
+                                        <i class="el-icon-delete"></i>
+                                        <span>删除</span>
+                                    </button>
+{#                                    <button type="button" class="el-button el-button--primary" data-toggle="modal" data-target="#addModal">#}
+                                    <button type="button" class="el-button el-button--primary" onclick="go_data_file_add()">
+                                        <i class="el-icon-plus"></i>
+                                        <span>增加</span>
+                                    </button>
+                                    <div class="el-button-group btn-group btn-group-right">
+                                        <a href="javascript:;" class="el-button el-button--default"><span class="el-icon-search"></span></a>
+{#                                            <a href="javascript:;" class="el-button el-button--default"><span class="el-icon-refresh"></span></a>#}
+{#                                            <a href="javascript:;" class="el-button el-button--default"><span class="el-icon-news"></span></a>#}
+                                    </div>
+                                    <div id='alldatafiles' style="display: block" class="table-responsive ">
+{#                                        bootstrap中类型上面的效果代码：#}
+{#                                        <div class="btn-group" role="group" aria-label="Button group with icons">#}
+{#                                            <button type="button" class="btn btn-default">#}
+{#                                                <i class="fas fa-search"></i>#}
+{#                                            </button>#}
+{#                                            <button type="button" class="btn btn-default">#}
+{#                                                <i class="fas fa-sync-alt"></i>#}
+{#                                            </button>#}
+{#                                            <button type="button" class="btn btn-default">#}
+{#                                                <i class="fas fa-newspaper"></i>#}
+{#                                            </button>#}
+{#                                        </div>#}
+                                        <table id='managetool_data_file_table' class="table table-striped">
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--预览 模态框-->
+    <div class="modal fade" id="filePreviewModal" tabindex="-1" aria-labelledby="filePreviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="filePreviewModalLabel">文件预览</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="filePreviewContent">
+                        <!-- 这里将会动态加载文件内容 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除 - 模态框 -->
+    <div class="modal fade" id="delete_config_modal" tabindex="-1" role="dialog" aria-labelledby="delete_config_modal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">确认删除？</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    确定要执行删除操作吗？这个操作无法撤销。
+                    <input type="hidden" id='delete_config_type' value="">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="delete_config_file()">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+    <script type="text/javascript">
+        let data_list = [];
+        get_config_data();
+        function get_config_data(){
+            $('#managetool_data_file_table').bootstrapTable('destroy').bootstrapTable({
+                url: '{% url 'testcases:managetool_data_file_get_data' %}',
+                method: 'post',
+                dataType: 'json',
+                striped: true,
+                pagination: true,
+                sidePagination: 'server',
+                pageNumber: 1,
+                pageSize: 2,
+                pageList: [10, 20, 30],
+                paginationPreText: '上一页',
+                paginationNextText: '下一页',
+                locale: 'zh-CN',
+                queryParams: function (params) {
+                    return {
+                        tags: '0',
+                        offset: params.offset,
+                        limit: params.limit, //即pageSize
+                    }
+                },
+                columns: [
+                    [
+                        {
+                            field: 'num',
+                            title: '编号',
+                            align: 'center',
+                            width: 50,
+                            class: 'custom-header-class',
+                            formatter: function (value, row, index) {
+                                // 计算当前页的第一个编号
+                                let pageSize = $('#managetool_data_file_table').bootstrapTable('getOptions').pageSize;
+                                let pageNumber = $('#managetool_data_file_table').bootstrapTable('getOptions').pageNumber;
+                                return pageSize * (pageNumber - 1) + index + 1;
+                            }
+                        },
+                        {
+                            field: 'system_name',
+                            title: '系统名称',
+                            align: 'center',
+                            class:'tooltip-show custom-header-class',
+                            cellStyle: {
+                                css: {
+                                    "overflow": "hidden",
+                                    "text-overflow": "ellipsis",
+                                    "white-space": "nowrap"
+                                }
+                            },
+                            width: 100,
+                        },
+                        {
+                            field: 'leve_1_name',
+                            title: '一级目录',
+                            align: 'center ',
+                            class: 'custom-header-class',
+                            cellStyle: {
+                                css: {
+                                    "overflow": "hidden",
+                                    "text-overflow": "ellipsis",
+                                    "white-space": "nowrap"
+                                }
+                            },
+                            width: 100
+                        },
+                        {
+                            field: 'leve_2_name',
+                            title: '二级目录',
+                            align: 'center',
+                            width: 100
+                        },
+                        {
+                            field: 'leve_3_name',
+                            title: '三级目录',
+                            align: 'center',
+                            width: 100
+                        },
+                        {
+                            field: 'leve_4_name',
+                            title: '四级目录',
+                            align: 'center',
+                            width: 100
+                        },
+                        {
+                            field: 'importance_level',
+                            title: '重要级别',
+                            align: 'center',
+                            width: 100
+                        },
+                        {
+                            field: 'function_name',
+                            title: '功能名称',
+                            align: 'center',
+                            width: 100
+                        },
+                        {
+                            field: 'function_code',
+                            title: '功能编号',
+                            align: 'center',
+                            width: 100
+                        },
+                        {
+                            field: 'file_type',
+                            title: '文件类型',
+                            align: 'center',
+                            width: 100
+                        },
+                        {
+                            field: 'file_name',
+                            title: '文件名称',
+                            align: 'center',
+                            width: 100
+                        },
+                        {
+                            field: 'file_update_time',
+                            title: '文件修改时间',
+                            align: 'center',
+                            width: 100
+                        },
+                        {
+                            field: '',
+                            title: '操作',
+                            align: 'center',
+                            width: 160,
+                            formatter: function (value, row, index) {
+                                console.log(row);
+                                let edit = `<a href="#" onclick="download_config_template_file('${row.config_file_type}')" title="下载"><i class="fas fa-download fa-lg"></i></a>`;
+                                edit += `<a href="#" onclick="show_update_modal('${row.config_file_type}')"  data-toggle="modal" data-target="#update_config_modal" title="编辑" class="ml-3">
+            <i class="fas fa-edit fa-lg"></i></a>`;
+                                edit += `<a href="#" onclick="previewFile('${row.file_path}', '${row.file_type}')" title="预览数据文件" class="ml-3">
+            <i class="fas fa-eye fa-lg"></i></a>`;
+                                edit += `<a href="#" onclick="show_delete_modal('${row.config_file_type}')" data-toggle="modal" data-target="#delete_config_modal" title="删除" class="ml-3">
+            <i class="fas fa-trash-alt fa-lg"></i></a>`;
+                                return edit;
+                            }
+                        }
+                    ]
+                ],
+                data: [
+                    {id: 1, system_name: '系统A'},
+                    {id: 2, system_name: '系统B'}
+                ],
+                rowStyle: function (row, index) {
+                    return {
+                        css: {
+                            "height": "5px",  // Adjust this value as needed
+                            "line-height": "5px",  // Ensure content is vertically centered
+                            "vertical-align": "middle"
+                        }
+                    };
+                }
+            })
+        }
+
+        function go_data_file_add(){
+            var pagenum = $('#managetool_data_file_table').bootstrapTable('getOptions').pageNumber;
+            var pagesize = $('#managetool_data_file_table').bootstrapTable('getOptions').pageSize;
+            window.location.href = "{% url 'testcases:managetool_data_file_add_page' %}?pagenum="+pagenum+"&pagesize="+pagesize;
+        }
+        //预览
+        function previewFile(filePath, fileType) {
+            console.log(filePath);
+            var pagenum = $('#managetool_data_file_table').bootstrapTable('getOptions').pageNumber;
+            var pagesize = $('#managetool_data_file_table').bootstrapTable('getOptions').pageSize;
+            window.location.href = "{% url 'testcases:managetool_data_file_preview_page' %}?pagenum="+pagenum+"&pagesize="+pagesize+"&file_path="+filePath;
+        }
+
+
+    </script>
+
+{% endblock javascripts %}

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-Hans-CN">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css">
+
+
+    <style>
+         /* 自定义表格样式 */
+        table.dataTable thead th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+    </style>
+    <title>文件预览页面</title>
+</head>
+<body>
+    <div id="filePreviewContent">
+        <!-- 文件预览内容将在此显示 -->
+        <img id="image_content" src="">
+        <textarea id='file_content_text' class="form-control" rows="10" readonly></textarea>
+        <table></table>
+    </div>
+
+    <script>
+        let file_content = "{{ file_content|escapejs  }}";
+        //let fileType = {{ file_extension|safe }};
+        //let file_content = "/media/mt/新建文本文档.txt";
+        let fileType = 'excel';
+        // 获取 URL 参数中的文件路径
+        {#const urlParams = new URLSearchParams(window.location.search);#}
+        {#const filePath = urlParams.get('filePath');#}
+
+
+        if (fileType === 'img') {
+
+            var image_content = document.getElementById('image_content');
+            image_content.src = file_content;
+
+        } else if (fileType === 'txt') {
+            var textAreaElement = document.getElementById('file_content_text');
+            textAreaElement.value = file_content;
+            textAreaElement.style.display = 'block';
+            textAreaElement.style.height = 'auto'; // 重置高度以便重新计算
+            textAreaElement.style.height = (textAreaElement.scrollHeight) + 'px'; // 设置新的高度
+            console.log(textAreaElement);
+
+        } else if (fileType === 'excel') {
+            // 使用SheetJS或其他库展示Excel文件内容
+            try {
+                // 将 Base64 编码的文件内容转换为二进制字符串
+                let binaryString = atob(file_content);
+
+                // 将二进制字符串转换为字节数组
+                let binaryArray = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    binaryArray[i] = binaryString.charCodeAt(i);
+                }
+
+                // 读取 Excel 文件内容
+                let workbook = XLSX.read(binaryArray, {type: 'array'});
+
+                // 获取第一个工作表
+                let worksheet = workbook.Sheets[workbook.SheetNames[0]];
+
+                // 将工作表转换为二维数组
+                let jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                console.log(jsonData);
+                // 生成表格的 HTML
+                let html = '<table id="previewTable" class="display"><thead><tr>';
+                jsonData[0].forEach(cell => {
+                    html += `<th>${cell}</th>`;
+                });
+                html += '</tr></thead><tbody>';
+                console.log(html);
+                for (let i = 1; i < jsonData.length; i++) {
+                    html += '<tr>';
+                    jsonData[i].forEach(cell => {
+                        html += `<td>${cell}</td>`;
+                    });
+                    html += '</tr>';
+                }
+                html += '</tbody></table>';
+                console.log(html);
+                // 将 HTML 内容插入到页面中
+                document.getElementById('filePreviewContent').innerHTML = html;
+                console.log(html);
+                // 初始化 DataTables
+                $('#previewTable').DataTable();
+            } catch (error) {
+                console.error("Error decoding Base64 string:", error);
+                document.getElementById('filePreviewContent').innerText = "文件预览失败，请检查文件格式。";
+            }
+        } else if (fileType === 'zip') {
+            $('#filePreviewContent').html(`<p>预览ZIP文件不是很常见，你可以提供下载链接或展开文件列表。</p>`);
+        } else {
+            $('#filePreviewContent').html(`<p>不支持的文件类型。</p>`);
+        }
+
+
+
+        // 根据文件路径加载相应的内容并展示
+        function loadFilePreview(filePath) {
+            // 假设后端提供了一个API来获取文件内容
+            $.ajax({
+                url: `/get_file_preview`, // 你需要实现这个API
+                method: 'GET',
+                data: {
+                    file_path: filePath
+                },
+                success: function (response) {
+                    if (fileType === 'image') {
+                        $('#filePreviewContent').html(`<img src="data:image/jpeg;base64,${response.data}" class="img-fluid" />`);
+                    } else if (fileType === 'text') {
+                        $('#filePreviewContent').html(`<pre>${response.data}</pre>`);
+                    } else if (fileType === 'excel') {
+                        // 使用SheetJS或其他库展示Excel文件内容
+                        let workbook = XLSX.read(response.data, {type: 'binary'});
+                        let html = XLSX.utils.sheet_to_html(workbook.Sheets[workbook.SheetNames[0]]);
+                        $('#filePreviewContent').html(html);
+                    } else if (fileType === 'zip') {
+                        $('#filePreviewContent').html(`<p>预览ZIP文件不是很常见，你可以提供下载链接或展开文件列表。</p>`);
+                    } else {
+                        $('#filePreviewContent').html(`<p>不支持的文件类型。</p>`);
+                    }
+                },
+                error: function (error) {
+                    console.error(error);
+                    $('#filePreviewContent').html(`<p>无法加载文件预览。</p>`);
+                }
+            });
+        }
+
+        // 页面加载完成后加载文件预览内容
+        {#window.onload = function() {#}
+        {#    loadFilePreview(filePath);#}
+        {# };#}
+    </script>
+</body>
+</html>

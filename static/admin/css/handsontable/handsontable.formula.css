@@ -1,0 +1,7 @@
+td.formula {
+  background-color:#d7d765;
+}
+td.formula-error {
+  background-color:#d65e5e;
+  color:white;
+}
