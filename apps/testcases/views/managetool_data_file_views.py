@@ -160,6 +160,18 @@ def managetool_data_file_preview_page_view(request):
     except Exception as e:
         return HttpResponse(f'Error: {e}', status=500)
 
-
+@csrf_exempt
+def get_data(request):
+    data = list(SystemContent.objects.values(
+        'system_name',
+        'leve_1_name',
+        'leve_2_name',
+        'leve_3_name',
+        'leve_4_name',
+        'function_name',
+        'function_code',
+        'importance_level'
+    ))
+    return JsonResponse(data, safe=False)
 
 
