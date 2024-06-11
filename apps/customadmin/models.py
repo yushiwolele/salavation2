@@ -19,13 +19,13 @@ class SystemContent(models.Model):
     系统结构表
     '''
     system_name =  models.CharField(verbose_name='系统名称', max_length=128, null=True)
-    leve_1_name =  models.CharField(verbose_name='一级目录', max_length=128, null=True)
-    leve_2_name =  models.CharField(verbose_name='二级目录', max_length=128, null=True)
-    leve_3_name =  models.CharField(verbose_name='三级目录', max_length=128, null=True)
-    leve_4_name =  models.CharField(verbose_name='四级目录', max_length=128, null=True)
-    importance_level =  models.CharField(verbose_name='重要级别', max_length=128, null=True)
+    leve_1_name =  models.CharField(verbose_name='一级目录', max_length=128, null=True,blank=True)
+    leve_2_name =  models.CharField(verbose_name='二级目录', max_length=128, null=True,blank=True)
+    leve_3_name =  models.CharField(verbose_name='三级目录', max_length=128, null=True,blank=True)
+    leve_4_name =  models.CharField(verbose_name='四级目录', max_length=128, null=True,blank=True)
+    importance_level =  models.CharField(verbose_name='重要级别', max_length=128, null=True,blank=True)
     function_name =  models.CharField(verbose_name='功能名称', max_length=128)
-    function_code =  models.CharField(verbose_name='功能编号', max_length=128, null=True)
+    function_code =  models.CharField(verbose_name='功能编号', max_length=128, null=True,blank=True)
     update_time = models.DateTimeField('更新时间', null=True)
     class Meta:
         db_table = 'system_content_table'
