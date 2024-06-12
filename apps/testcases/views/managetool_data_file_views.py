@@ -172,6 +172,12 @@ def get_data(request):
         'function_code',
         'importance_level'
     ))
+    # 转换空字符串为'/'
+    for item in data:
+        for key, value in item.items():
+            if value == '' or value is None:
+                item[key] = '/'
+    print(data)
     return JsonResponse(data, safe=False)
 
 

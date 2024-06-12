@@ -59,55 +59,55 @@
                                         <form id="addForm">
                                             <div class="form-group">
                                                 <label for="systemName">系统名称</label>
-                                                <select class="selectpicker my_select_input " id="systemName" name="system_name" >
+                                                <select class="select2 my_select_input " id="systemName" name="system_name" >
                                                 </select>
                                             </div>
                                             <div class="form-group">
                                                 <label for="level1">一级目录</label>
-                                                <select class="selectpicker my_select_input " id="level1" name="level_1_name" >
+                                                <select class="select2 my_select_input " id="level1" name="level_1_name" >
                                                     <option value="0">/</option>
                                                 </select>
                                             </div>
 
                                             <div class="form-group">
                                                 <label for="level2">二级目录</label>
-                                                <select class="selectpicker my_select_input " id="level2" name="level_2_name" disabled>
+                                                <select class="select2 my_select_input " id="level2" name="level_2_name" >
                                                     <option value="0">/</option>
                                                 </select>
                                             </div>
                                             <div class="form-group">
                                                 <label for="level3">三级目录</label>
-                                                <select class="selectpicker my_select_input " id="level3" name="level_3_name" disabled>
+                                                <select class="select2 my_select_input " id="level3" name="level_3_name" >
                                                     <option value="0">/</option>
                                                 </select>
                                             </div>
                                             <div class="form-group">
                                                 <label for="level4">四级目录</label>
-                                                <select class="selectpicker my_select_input " id="level4" name="level_4_name" disabled>
+                                                <select class="select2 my_select_input " id="level4" name="level_4_name" >
                                                     <option value="0">/</option>
                                                 </select>
                                             </div>
                                             <div class="form-group">
                                                 <label for="functionName">功能名称</label>
-                                                <select class="selectpicker my_select_input " id="functionName" name="function_name">
+                                                <select class="select2 my_select_input " id="functionName" name="function_name">
                                                     <option value="0">/</option>
                                                 </select>
                                             </div>
                                             <div class="form-group">
                                                 <label for="functionCode">功能编号</label>
-                                                <select class="selectpicker my_select_input " id="functionCode" name="function_code">
+                                                <select class="select2 my_select_input " id="functionCode" name="function_code">
                                                     <option value="0">/</option>
                                                 </select>
                                             </div>
                                             <div class="form-group">
                                                 <label for="importanceLevel ">重要级别</label>
-                                                <select class="selectpicker my_select_input " id="importanceLevel" name="importance_level">
+                                                <select class="select2 my_select_input " id="importanceLevel" name="importance_level">
                                                     <option value="0">/</option>
                                                 </select>
                                             </div>
                                             <div class="form-group">
                                                 <label for="fileType">文件类型</label>
-                                                <select class="selectpicker my_select_input " id="fileType" name="file_type" >
+                                                <select class="select2 my_select_input " id="fileType" name="file_type" >
                                                     <option value="0">/</option>
                                                 </select>
 
@@ -147,6 +147,7 @@
         let fileTypes = {{ file_types|to_js|safe }};
         let pagenum = {{ pagenum }};
         let pagesize = {{ pagesize }};
+        console.log(systemStructures);
         // selectpicker 配置
         {#$(".selectpicker").selectpicker({#}
         {#    liveSearch: true,       // 允许模糊搜索#}
@@ -155,19 +156,28 @@
         {#    deselectAllText: '取消全选',#}
         {# });#}
         // 初始化 Select2 并启用标签功能
-        {#$('.my_select_input').select2({#}
-        {#    tags: true,#}
-        {#    placeholder: "选择或输入文件类型",#}
-        {#    allowClear: true,#}
-        {#    //dropdownParent: $('#addModal')  // 将下拉列表附加到模态框内#}
-        {# });#}
-
-        $(".selectpicker").selectpicker({
-            liveSearch: true,       // 允许模糊搜索
-            selectOnTab: true,      // 允许键入空格或制表符
-            selectAllText: '全选',
-            deselectAllText: '取消全选',
+        $('.my_select_input').select2({
+            tags: false,
+            placeholder: "选择或输入文件类型",
+            allowClear: true,
+            //dropdownParent: $('#addModal')  // 将下拉列表附加到模态框内
+         }).on('select2:select', function(e) {
+             console.log('11111');
+             isClearing = false;
+        }).on('select2:unselecting', function(e) { //点击叉号会进入这里
+            console.log('22222');
+            // 阻止下拉列表展开
+            isClearing = true;
+            $(this).data('state', 'unselecting');
+        }).on('select2:opening', function(e) { //下拉列表展开时会进入这里
+            console.log('333333333');
+            if ($(this).data('state') === 'unselecting') {
+                console.log('44444444444');
+                $(this).removeData('state');
+                e.preventDefault();
+            }
         });
+
 
 
         // 加载数据并填充选择框
@@ -177,63 +187,71 @@
             success: function(data) {
 
                 let systemNames = new Set();
+                let level1Names = new Set();
+                let level2Names = new Set();
+                let level3Names = new Set();
+                let level4Names = new Set();
+                let importanceLevel = new Set();
                 let functionNames = new Set();
                 let functionCodes = new Set();
 
                 data.forEach(item => {
                     systemNames.add(item.system_name);
+                    level1Names.add(item.leve_1_name);
+                    level2Names.add(item.leve_2_name);
+                    level3Names.add(item.leve_3_name);
+                    level4Names.add(item.leve_4_name);
+                    importanceLevel.add(item.importance_level);
                     functionNames.add(item.function_name);
                     functionCodes.add(item.function_code);
                 });
 
-                console.log(systemNames);
-                console.log(functionNames);
-                console.log(functionCodes);
-
                 populateSelect('#systemName', systemNames);
+                populateSelect('#level1', level1Names);
+                populateSelect('#level2', level2Names);
+                populateSelect('#level3', level3Names);
+                populateSelect('#level4', level4Names);
+                populateSelect('#importanceLevel', importanceLevel);
                 populateSelect('#functionName', functionNames);
                 populateSelect('#functionCode', functionCodes);
 
-                $('#systemName').on('change', function() {
-                    const systemName = $(this).val();
-                    handleSystemNameChange(data, systemName);
-                });
-
-                $('#systemName').selectpicker("refresh");
-
-                $('#level1').on('change', function() {
-                    const level1 = $(this).val();
-                    handleLevelChange(data, 'leve_1_name', level1, ['level2', 'functionName', 'functionCode']);
-                });
-
-                $('#level1').selectpicker("refresh");
-
-                $('#level2').on('change', function() {
-                    const level2 = $(this).val();
-                    handleLevelChange(data, 'leve_2_name', level2, ['level3', 'functionName', 'functionCode']);
-                });
-
-                $('#level3').on('change', function() {
-                    const level3 = $(this).val();
-                    handleLevelChange(data, 'leve_3_name', level3, ['level4', 'functionName', 'functionCode']);
-                });
-
-                $('#level4').on('change', function() {
-                    const level4 = $(this).val();
-                    handleLevelChange(data, 'leve_4_name', level4, ['functionName', 'functionCode']);
-                });
-
-                $('#functionName').on('change', function() {
-                    const functionName = $(this).val();
-                    handleFunctionNameChange(data, functionName);
-                });
-
-                $('#functionName').selectpicker("refresh");
-
-                $('#functionCode').on('change', function() {
-                    const functionCode = $(this).val();
-                    handleFunctionCodeChange(data, functionCode);
-                });
+               $('.my_select_input').val(null);
+                {#$('#systemName').on('change', function() {#}
+                {#    const systemName = $(this).val();#}
+                {#    handleSystemNameChange(data, systemName);#}
+                {#});#}
+                {##}
+                {#$('#level1').on('change', function() {#}
+                {#    const level1 = $(this).val();#}
+                {#    handleLevelChange(data, 'leve_1_name', level1, ['level2', 'functionName', 'functionCode']);#}
+                {#});#}
+                {##}
+                {##}
+                {#$('#level2').on('change', function() {#}
+                {#    const level2 = $(this).val();#}
+                {#    handleLevelChange(data, 'leve_2_name', level2, ['level3', 'functionName', 'functionCode']);#}
+                {#});#}
+                {##}
+                {#$('#level3').on('change', function() {#}
+                {#    const level3 = $(this).val();#}
+                {#    handleLevelChange(data, 'leve_3_name', level3, ['level4', 'functionName', 'functionCode']);#}
+                {#});#}
+                {##}
+                {#$('#level4').on('change', function() {#}
+                {#    const level4 = $(this).val();#}
+                {#    handleLevelChange(data, 'leve_4_name', level4, ['functionName', 'functionCode']);#}
+                {#});#}
+                {##}
+                {#$('#functionName').on('change', function() {#}
+                {#    const functionName = $(this).val();#}
+                {#    handleFunctionNameChange(data, functionName);#}
+                {#});#}
+                {##}
+                {##}
+                {#$('#functionCode').on('change', function() {#}
+                {#    const functionCode = $(this).val();#}
+                {#    handleFunctionCodeChange(data, functionCode);#}
+                {#});#}
             }
         });
 
@@ -243,12 +261,70 @@
             items.forEach(item => {
                 select.append(new Option(item, item));
             });
-            select.selectpicker("refresh");
         }
+
+        //选择系统名称
+        $('#systemName').on('change',function(){
+            //获取所有的有选项的数据
+            let systemnamevalue = $('#systemName').val();
+            let firstlevelValue = $('#level1').val();
+            let secondlevelValue = $('#level2').val();
+            let thirdlevelValue = $('#level3').val();
+            let forthlevelValue = $('#level4').val();
+            let functionNameValue = $('#functionName').val();
+            let functionCodeValue = $('#functionCode').val();
+            let importancelevelValue = $('#importanceLevel').val();
+
+            console.log(secondlevelValue);
+            if(systemnamevalue === null){
+                console.log('systemName没有选择shuju');
+            }else{
+                //选择了系统名称
+                if(firstlevelValue === null){  //
+
+                }
+
+            }
+
+
+        })
+
+        $('#functionName').on('change',function(){
+            //获取所有的有选项的数据
+
+            let functionName = $(this).val();
+            let filteredItem = systemStructures.filter(item => item.function_name === functionName);
+            $('#systemName').val(filteredItem.system_name);
+            $('#level1').val(filteredItem.leve_1_name);
+            $('#level2').val(filteredItem.leve_2_name);
+            $('#level3').val(filteredItem.leve_3_name);
+            $('#level4').val(filteredItem.leve_4_name);
+            $('#systemName').empty()
+            filteredItem.forEach(item => {
+                console.log(item)
+                $('#systemName').append(new Option(item.system_name, item.system_name));
+            });
+
+
+        })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         function handleSystemNameChange(data, systemName) {
 
-            console.log('111111111');
             let level1Names = new Set();
             let functionNames = new Set();
             let functionCodes = new Set();
@@ -305,8 +381,6 @@
                 }
             });
 
-            $('#functionCode').val(functionCode).selectpicker("refresh");
-            $('#importanceLevel').val(importanceLevel).selectpicker("refresh");
         }
 
         function handleFunctionCodeChange(data, functionCode) {
@@ -320,8 +394,6 @@
                 }
             });
 
-            $('#functionName').val(functionName).selectpicker("refresh");
-            $('#importanceLevel').val(importanceLevel).selectpicker("refresh");
         }
 
 
