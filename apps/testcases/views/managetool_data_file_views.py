@@ -97,8 +97,25 @@ def managetool_data_file_add_page_view(request):
     '''
     pagenum = request.GET.get('pagenum')
     pagesize = request.GET.get('pagesize')
-    system_structures = list(SystemContent.objects.values())
+    #system_structures = list(SystemContent.objects.values())
     file_types = list(FileType.objects.values())
+
+    system_structures = list(SystemContent.objects.values(
+        'system_name',
+        'leve_1_name',
+        'leve_2_name',
+        'leve_3_name',
+        'leve_4_name',
+        'function_name',
+        'function_code',
+        'importance_level'
+    ))
+    # 转换空字符串为'/'
+    for item in system_structures:
+        for key, value in item.items():
+            if value == '' or value is None:
+                item[key] = '/'
+
     response = render(request, template_name='managetool/managetool_data_file_add.html', context={'system_structures': system_structures,
                                                                                               'file_types': file_types,
                                                                                               'pagenum':pagenum,

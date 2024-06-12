@@ -290,25 +290,24 @@
         })
 
         $('#functionName').on('change',function(){
-            //获取所有的有选项的数据
-
             let functionName = $(this).val();
             let filteredItem = systemStructures.filter(item => item.function_name === functionName);
-            $('#systemName').val(filteredItem.system_name);
-            $('#level1').val(filteredItem.leve_1_name);
-            $('#level2').val(filteredItem.leve_2_name);
-            $('#level3').val(filteredItem.leve_3_name);
-            $('#level4').val(filteredItem.leve_4_name);
-            $('#systemName').empty()
-            filteredItem.forEach(item => {
-                console.log(item)
-                $('#systemName').append(new Option(item.system_name, item.system_name));
-            });
-
-
+            changeItem(filteredItem, "systemName", "level1",  "level2", "level3", "level4", "functionCode", "importanceLevel", 'system_name');
         })
 
-
+        function changeItem(items, t1, t2, t3, t4, t5, t6, t7, s1, s2, s3, s4, s5, s6, s7) {
+             $('#' + t1 + ', #' + t2 + ', #' + t3 + ', #' + t4 + ', #' + t5 + ', #' + t6 + ', #' + t7).empty();
+            items.forEach(item => {
+                console.log(item)
+                $('#'+t1).append(new Option(item[s1], item[s1]));
+                $('#level1').append(new Option(item.leve_1_name, item.leve_1_name));
+                $('#level2').append(new Option(item.leve_2_name, item.leve_2_name));
+                $('#level3').append(new Option(item.leve_3_name, item.leve_3_name));
+                $('#level4').append(new Option(item.leve_4_name, item.leve_4_name));
+                $('#functionCode').append(new Option(item.function_code, item.function_code));
+                $('#importanceLevel').append(new Option(item.importance_level, item.importance_level));
+            });
+        }
 
 
 
