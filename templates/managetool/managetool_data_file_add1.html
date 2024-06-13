@@ -1,0 +1,332 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+{#    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css">#}
+{#    <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>#}
+
+    <script src="{% static 'admin/js/handsontable.full.min.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/handsontable.full.min.css' %}" />
+</head>
+<body>
+    <div id="example" class="hot"></div>
+
+    <script>
+        var data = [
+            {#['结算机构A', '一级目录', '二级目录', '三级目录', '四级目录', 'A股备付金', 'ZA', '一般类'],#}
+            {#['结算机构A', '一级目录', '二级目录', '三级目录', '四级目录', 'A股备付金余额', 'ZA001', '一般类'],#}
+            ['数据查询统计系统', '结算业务', '二级目录', '三级目录', '', 'a股份备付金', 'za0001', '一般类—业务查询'],
+            ['数据查询统计系统', '结算业务', '港股通', '港股备份', '', '支付金预付', 'za0021', '一般类—业务类'],
+            ['数据查询统计系统', '结算业务', '港股通', '', '', '银行预付', 'Jx0021', ''],
+            ['数据查询统计系统', '支付业务', '', '', '', '三级账户支付', 'uu0001', ''],
+            ['风险监测系统', '等支付金', '等预算支付', '', '', '二类账户', 'hj0021', '重要类—业务类'],
+            ['风险监测系统', '', '', '', '', '京杭账户', 'hj0028', '重要类—业务类'],
+            ['风险监测系统', '', '', '', '', '京杭账户等级支付', 'hj0029', ''],
+            ['风险监测系统', '结算业务', '', '', '', 'a股份备付金', 'za0001', '一般类—业务查询'],
+            // 更多数据
+        ];
+
+        var container = document.getElementById('example');
+        var hot = new Handsontable(container, {
+            data: data,
+            colHeaders: ['系统名称', '一级目录', '二级目录', '三级目录', '四级目录', '功能名称', '功能编号', '重要级别'],
+            rowHeaders: true,
+            filters: true,
+            dropdownMenu: true,
+            licenseKey: "non-commercial-and-evaluation"
+            //licenseKey: "4d522-5237a-55f42-6653a-d1494"
+        });
+
+
+
+        function generateKey() {
+
+      function random(min, max) {
+        let n = max - min + 1
+        return Math.ceil((Math.random() * n)) - 1 + min
+      }
+
+
+      function randomString(length) {
+        let r = ''
+        for (let i = 0; i < length; i++) {
+          r += random(0, 15).toString(16)
+        }
+        return r
+      }
+
+      function calcFF(x) {
+        /*
+            计算所有可能 取一种 概率准 效率高
+            当 y ∈ [0, 100)
+            则 (100x + y) % 97 = 1
+            y % 97 = 97 - 100x % 97 + 1
+            y % 97 = 98 - 100x % 97
+            y = a * 97 + (98 - 100x % 97)
+            ∵ y ∈ [0, 100) , 98 - 100x % 97 ∈ [2, 98]
+            ∴ 当 98 - 100x % 97 <= 2 时 a ∈ [0, 1]
+               当 98 > 98 - 100x % 97 > 2 时 a = 0
+               当 98 - 100x % 97 = 98 时 a ∈ [-1, 0]
+            ∵ y  < 100
+            ∴ 当 98 - 100x % 97 <= 2 的时候 y的最小值为 98 - 100x % 97
+               当 98 > 98 - 100x % 97 > 2 的时候 y的最小值也为 98 - 100x % 97
+               当 98 - 100x % 97 = 98 的时候 y的最小值为 1
+            ∴ 当 98 > 98 - 100x % 97  的时候 y的最小值为 98 - 100x % 97
+               当 98 = 98 - 100x % 97  的时候 y的最小值为 1
+            当 y ∈ [100, 255]
+            则 (1000x + y) % 97 = 1
+            y % 97 = 97 - 1000x % 97 + 1
+            y % 97 = 98 - 1000x % 97
+            y = a * 97 + (98 - 1000x % 97)
+            ∵ y ∈ [100, 255] , 98 - 1000x % 97 ∈ [2, 98]
+            ∴ 98 - 1000x % 97 < 3 时 a = 2
+               3 <= 98 - 1000x % 97 <= 61 时 a ∈ [1, 2]
+            ∵ y 的最大值肯定 > 100
+            ∴ 当 98 - 1000x % 97 < 3 时 y 的最大值为 98 - 1000x % 97 + 97 * 2
+               当 98 - 1000x % 97 > 61 时 y 的最大值为 98 - 1000x % 97 + 97 * 1
+               当 3 <= 98 - 1000x % 97 <= 61 时 y 的最大值为 98 - 1000x % 97 + 97 * 2
+            ∴ 当 98 - 1000x % 97 <= 61 时 y 的最大值为 98 - 1000x % 97 + 97 * 2
+               当 98 - 1000x % 97 > 61 时 y 的最大值为 98 - 1000x % 97 + 97 * 1
+        */
+
+        let min, max, ys = [],
+          y
+
+        if (98 - 100 * x % 97 === 98) {
+          min = 1
+        } else {
+          min = 98 - 100 * x % 97
+        }
+
+        if (98 - 1000 * x % 97 > 61) {
+          max = 98 - 1000 * x % 97 + 97 * 1
+        } else {
+          max = 98 - 1000 * x % 97 + 97 * 2
+        }
+
+        let i = 0
+
+        do {
+          ys.push(max - i * 97)
+          i++
+        } while (max - i * 97 >= 100)
+
+
+        if (min + 97 < 100) {
+          ys.push(min + 97)
+        }
+        ys.push(min)
+
+        y = ys[random(0, ys.length - 1)]
+
+        return y.toString(16).padStart(2, '0')
+      }
+
+      function calcFF_2(x) {
+
+        /*
+            //这个方法概率不准 因为只是简单的假设y 并没有由x推导 效率高
+            若要使  0 <= y < 100
+            则 (100x + y) % 97 = 1
+            y % 97 = 97 - 100x % 97 + 1
+            y % 97 = 98 - 100x % 97
+            y = a * 97 + (98 - 100x % 97)
+            ∵ y ∈ [0, 100) , 98 - 100x % 97 ∈ [2, 98]
+            ∴ 当 98 - 100x % 97 <= 2 时 a ∈ [0, 1]
+               当 98 > 98 - 100x % 97 > 2 时 a = 0
+               当 98 - 100x % 97 = 98 时 a ∈ [-1, 0]
+            若要使 100 <= y <= 255
+            则 (1000x + y) % 97 = 1
+            y % 97 = 97 - 1000x % 97 + 1
+            y % 97 = 98 - 1000x % 97
+            y = a * 97 + (98 - 1000x % 97)
+            ∵ y ∈ [100, 255] , 98 - 1000x % 97 ∈ [2, 98]
+            ∴ 98 - 1000x % 97 < 3 时 a = 2
+               3 <= 98 - 1000x % 97 <= 61 时 a ∈ [1, 2]
+        */
+
+        let y = 0
+
+        if (random(0, 255) < 100) {
+          let z = 98 - 100 * x % 97
+          if (z <= 2) {
+            y = random(0, 1) * 97 + z
+          } else if (z == 98) {
+            y = random(-1, 0) * 97 + z
+          } else {
+            y = z
+          }
+        } else {
+          let z = 98 - 1000 * x % 97
+          if (z < 3) {
+            y = 2 * 97 + z
+          } else if (z > 61) {
+            y = 97 + z
+          } else {
+            y = random(1, 2) * 97 + z
+          }
+        }
+        return y.toString(16).padStart(2, '0')
+      }
+
+      function calcFF_3(x) {
+        /*
+            取所有可能一个个随机试 效率最差 但是实现最简单 效率低100倍
+        */
+        let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
+          27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52,
+          53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78,
+          79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103,
+          104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124,
+          125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145,
+          146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166,
+          167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187,
+          188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208,
+          209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229,
+          230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250,
+          251, 252, 253, 254, 255
+        ]
+        let y
+        do {
+          let i = random(0, arr.length - 1)
+          y = arr.splice(i, 1)[0]
+        } while (((y > 100 ? (1000 * x) : (100 * x)) + y) % 97 !== 1)
+        return y.toString(16).padStart(2, '0')
+      }
+
+      function build(day = 365) {
+        //根据验证需求 day需小于 45000
+        //随机生成的 1-6 9-14 17-18 位 除了第二位为时间因数 其他数字可自定义 成为用户信息标识符
+        for (let i = 0; i < 3; i++) {
+          if (i === 0) {
+            //第 1-6 位任意 第二位为时间校验码的因数
+            v = randomString(6)
+
+            //第 1-6 位与第 7-8 位 各自转成十进制再转成字符串相连转整数 需要能被97除余1
+
+            //取 7-8 位
+            v += calcFF(parseInt(v.substr(0, 6), 16))
+          } else if (i === 1) {
+            //第 9-14 位随机生成
+            v += randomString(6)
+            //第 7-14 位与第 15-16 位 各自转成十进制再转成字符串相连转整数 需要能被97除余1
+
+            //取 15-16 位
+            v += calcFF(parseInt(v.substr(6, 8), 16))
+          } else {
+            //第 17-18 位随机生成
+            v += randomString(2)
+
+            //第 19-23 位时间校验码
+            //当前时间戳的天数 + 有效天数 乘以第2位校验因数 如果为0 就乘以9 转16进制
+            let n = (parseInt((new Date()) / 8.64e7) + day) * (parseInt(v.substr(1, 1), 16) || 9)
+            if (n > parseInt('fffff', 16)) {
+              //如果时间校验码超过五位 为错误
+              //理论上不可能 就算有效期至100年以后因数取最大都不会超过这个数
+              return ""
+            }
+            v += n.toString(16).padStart(5, '0')
+
+            //第 15-23 位与第 24-25 位各自转成十进制再转成字符串相连转整数 需要能被97除余1
+
+            //取 24-25 位
+            v += calcFF(parseInt(v.substr(14, 9), 16))
+          }
+        }
+        let r = []
+        for (let i = 0; i < 5; i++) {
+          r.push(v.substr(i * 5, 5))
+        }
+        return r.join('-')
+      }
+
+      function _checkKeySchema(v) {
+        //验证有效性
+        let p = 0;
+        if (v.length !== 25) {
+          return false;
+        }
+        for (let item of [
+            [0, 6, 6],
+            [6, 8, 14],
+            [14, 9, 23]
+          ]) {
+          if (parseInt(parseInt(v.substr(item[0], item[1]), 16) + String(parseInt(v.substr(item[2], 2), 16)).padStart(
+              2, '0')) % 97 !== 1) {
+
+            return false
+          }
+        }
+        return true
+      }
+
+      function _extractTime(v) {
+        //获取有效期时间戳
+        return parseInt(v.substr(18, 5), 16) / (parseInt(v.substr(1, 1), 16) || 9)
+      }
+
+      function vaild(k) {
+        //验证函数
+        let v = k.replace(/\-/g, '')
+        let keyGenTime = _extractTime(v)
+        if (keyGenTime > 45000 || keyGenTime !== parseInt(keyGenTime, 10)) {
+          return false
+        }
+        let releaseTime = Math.floor((new Date()) / 8.64e7)
+        if (releaseTime > keyGenTime + 1) {
+          return false
+        }
+        return _checkKeySchema(v)
+      }
+      return build()
+
+    }
+
+    for (let i = 0; i < 10; i++) {
+      console.log('licenseKey-' + (i + 1) + ': ', generateKey())
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -116,7 +116,7 @@ def managetool_data_file_add_page_view(request):
             if value == '' or value is None:
                 item[key] = '/'
 
-    response = render(request, template_name='managetool/managetool_data_file_add.html', context={'system_structures': system_structures,
+    response = render(request, template_name='managetool/managetool_data_file_add4.html', context={'system_structures': system_structures,
                                                                                               'file_types': file_types,
                                                                                               'pagenum':pagenum,
                                                                                               'pagesize':pagesize})
