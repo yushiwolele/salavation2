@@ -1,0 +1,57 @@
+{% extends "layouts/baseNohtmlTag.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/ag-grid-community_styles_ag-grid.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/ag-grid-community_styles_ag-theme-alpine.css' %}" />
+     <style>
+        html, body, #myGrid {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div id="myGrid" class="ag-theme-alpine"></div>
+    <script src="{% static 'admin/js/ag-grid-community_dist_ag-grid-community.noStyle.js' %}"></script>
+{#    <script src="{% static 'admin/js/xlsx_0.17.1_xlsx.full.min.js' %}"></script>#}
+    <script src="{% static 'admin/js/ag-grid/ag-grid-community_dist_ag-grid-community.js' %}"></script>
+    <script>
+        var columnDefs = [
+            { headerName: "系统名称", field: "system_name" },
+            { headerName: "一级目录", field: "leve_1_name" },
+            { headerName: "二级目录", field: "leve_2_name" },
+            { headerName: "三级目录", field: "leve_3_name" },
+            { headerName: "四级目录", field: "leve_4_name" },
+            { headerName: "功能名称", field: "function_name" },
+            { headerName: "功能编号", field: "function_code" },
+            { headerName: "重要级别", field: "importance_level" }
+        ];
+
+        var rowData = [
+            { system_name: '数据查询统计系统', leve_1_name: '结算业务', leve_2_name: '/', leve_3_name: '/', leve_4_name: '/', function_name: 'a股份备付金', function_code: 'za0001', importance_level: '一般类—业务查询' }
+        ];
+
+       // 创建网格选项
+        const gridOptions = {
+            columnDefs: columnDefs,
+            rowData: rowData,
+            defaultColDef: {
+                flex: 1,
+                minWidth: 150,
+                filter: 'agTextColumnFilter', // 默认使用文本过滤器
+                floatingFilter: true, // 启用浮动筛选
+            }
+        };
+        // 初始化网格
+        document.addEventListener('DOMContentLoaded', function() {
+            const myGridElement = document.querySelector('#myGrid');
+            agGrid.createGrid(myGridElement, gridOptions);
+        });
+    </script>
+</body>
+</html>

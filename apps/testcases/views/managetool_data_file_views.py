@@ -24,7 +24,7 @@ def managetool_data_file_page_view(request):
     :param request:
     :return:
     '''
-    response = render(request, template_name='managetool/managetool_data_file.html', context={})
+    response = render(request, template_name='managetool/managetool_data_file2.html', context={})
     return response
 
 @csrf_exempt
@@ -37,6 +37,61 @@ def managetool_data_file_get_data_view(request):
     # 获取分页参数
     limit = int(request.GET.get('limit', 10))
     offset = int(request.GET.get('offset', 0))
+    #ManageToolDataFileModel
+    #data_files = ManageToolDataFileModel.objects.select_related('system_conten_id').all()[offset:offset + limit]  AB表有外键关联关系
+    # 查询数据文件表
+    data_files = ManageToolDataFileModel.objects.all()[offset:offset + limit]
+
+    # 获取所有相关的系统结构数据
+    system_ids = [data_file.system_conten_id for data_file in data_files]
+    systems = {system.id: system for system in SystemContent.objects.filter(id__in=system_ids)}
+
+    #获取所有相关的文件类型数据
+    file_type_ids = [data_file.file_type_id for data_file in data_files]
+    file_types = {file_type.id: file_type for file_type in FileType.objects.filter(id__in=file_type_ids)}
+
+    resp_container = []
+    for file in data_files:
+        system = systems.get(file.system_conten_id)
+        file_type = file_types.get(file.file_type_id)
+        file_name = os.path.basename(file.file_path)  # 获取文件名部分
+        resp_container.append({
+            'file_id': file.id,
+            'file_type': file_type.filetype if file_type is not None else '',
+            'file_path': file.file_path,
+            'file_name': file_name,
+            'file_update_time': file.update_time,
+            'system_id': system.id if system else None,
+            'system_name': system.system_name if system else '',
+            'leve_1_name': system.leve_1_name if system else '',
+            'leve_2_name': system.leve_2_name if system else '',
+            'leve_3_name': system.leve_3_name if system else '',
+            'leve_4_name': system.leve_4_name if system else '',
+            'importance_level': system.importance_level if system else '',
+            'function_name': system.function_name if system else '',
+            'function_code': system.function_code if system else '',
+        })
+    return JsonResponse({
+        'total': ManageToolDataFileModel.objects.count(),
+        'rows': resp_container
+    })
+
+
+
+@csrf_exempt
+def managetool_data_file_get_data_view1(request):
+    '''
+    获取数据文件表的数据
+    :param request:
+    :return:
+    '''
+    # 获取分页参数
+    page = int(request.query_params.get('page', 1))
+    limit = int(request.query_params.get('page_size', 10))
+    offset = (page - 1) * limit
+
+    #limit = int(request.GET.get('limit', 10))
+    #offset = int(request.GET.get('offset', 0))
     #ManageToolDataFileModel
     #data_files = ManageToolDataFileModel.objects.select_related('system_conten_id').all()[offset:offset + limit]  AB表有外键关联关系
     # 查询数据文件表
@@ -99,7 +154,7 @@ def managetool_data_file_add_page_view(request):
     pagesize = request.GET.get('pagesize')
     system_structures = list(SystemContent.objects.values())
     file_types = list(FileType.objects.values())
-    response = render(request, template_name='managetool/managetool_data_file_add.html', context={'system_structures': system_structures,
+    response = render(request, template_name='managetool/managetool_data_file_add5.html', context={'system_structures': system_structures,
                                                                                               'file_types': file_types,
                                                                                               'pagenum':pagenum,
                                                                                               'pagesize':pagesize})
@@ -172,6 +227,14 @@ def get_data(request):
         'function_code',
         'importance_level'
     ))
+    data = [
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '/', 'leve_3_name': '/', 'leve_4_name': '/',
+         'function_name': 'a股份备付金', 'function_code': 'za0001', 'importance_level': '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '港股通', 'leve_3_name': '港股备份',
+         'leve_4_name': '', 'function_name': '支付金预付', 'function_code': 'za0021', 'importance_level': '一般类—业务类'},
+        {'system_name': '风控系统', 'leve_1_name': '结算业务1', 'leve_2_name': '港股通2', 'leve_3_name': '港股备份',
+         'leve_4_name': '四级目录', 'function_name': '支付金预付余额', 'function_code': 'za0022', 'importance_level': '重要类—业务类'}
+    ]
     return JsonResponse(data, safe=False)
 
 

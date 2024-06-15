@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DataTables Example with Column Filtering</title>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+    <!-- jQuery -->
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <!-- DataTables JS -->
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
+    <!-- DataTables Column Filter JS -->
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/plug-ins/1.10.21/api/fnFilterClear.js"></script>
+    <style>
+        tfoot {
+            display: table-header-group;
+        }
+    </style>
+</head>
+<body>
+    <table id="example" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>系统名称</th>
+                <th>一级目录</th>
+                <th>二级目录</th>
+                <th>三级目录</th>
+                <th>四级目录</th>
+                <th>功能名称</th>
+                <th>功能编号</th>
+                <th>重要级别</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <th>系统名称</th>
+                <th>一级目录</th>
+                <th>二级目录</th>
+                <th>三级目录</th>
+                <th>四级目录</th>
+                <th>功能名称</th>
+                <th>功能编号</th>
+                <th>重要级别</th>
+            </tr>
+        </tfoot>
+        <tbody>
+            <tr>
+                <td>结算机构A</td>
+                <td>一级目录</td>
+                <td>二级目录</td>
+                <td>三级目录</td>
+                <td>四级目录</td>
+                <td>A股备付金</td>
+                <td>ZA</td>
+                <td>一般类</td>
+            </tr>
+            <tr>
+                <td>结算机构A</td>
+                <td>一级目录</td>
+                <td>二级目录</td>
+                <td>三级目录</td>
+                <td>四级目录</td>
+                <td>A股备付金</td>
+                <td>ZA_0001_0001</td>
+                <td>一般类</td>
+            </tr>
+            <tr>
+                <td>结算机构A</td>
+                <td>一级目录</td>
+                <td>二级目录</td>
+                <td>三级目录</td>
+                <td>四级目录</td>
+                <td>A股备付金余额</td>
+                <td>ZA_0001_0002</td>
+                <td>一般类</td>
+            </tr>
+            <tr>
+                <td>结算机构A</td>
+                <td>一级目录</td>
+                <td>二级目录</td>
+                <td>三级目录</td>
+                <td>四级目录</td>
+                <td>信用卡备付金余额</td>
+                <td>ZA_0001_0003</td>
+                <td>一般类</td>
+            </tr>
+            <tr>
+                <td>结算机构A</td>
+                <td>一级目录</td>
+                <td>二级目录</td>
+                <td>三级目录</td>
+                <td>四级目录</td>
+                <td>存款转账功能</td>
+                <td>ZA_0001_0004</td>
+                <td>一般类</td>
+            </tr>
+            <tr>
+                <td>结算机构A</td>
+                <td>一级目录</td>
+                <td>二级目录</td>
+                <td>三级目录</td>
+                <td>四级目录</td>
+                <td>理财产品功能</td>
+                <td>ZA_0001_0005</td>
+                <td>重要类</td>
+            </tr>
+            <tr>
+                <td>结算机构A</td>
+                <td>一级目录</td>
+                <td>二级目录</td>
+                <td>三级目录三级目录三级目录三级目录三级目录三级目录三级目录三级目录</td>
+                <td>四级目录</td>
+                <td>农银通信理财管理</td>
+                <td>ZA_0001_0006</td>
+                <td>一般类-非柜台</td>
+            </tr>
+            <tr>
+                <td>公安部查询</td>
+                <td>证券冻结与轮候冻结变动明细</td>
+                <td>变动明细</td>
+                <td>港股通</td>
+                <td>/</td>
+                <td>沪市三级页面</td>
+                <td>ZA_0001_0007</td>
+                <td>/</td>
+            </tr>
+            <tr>
+                <td>公安部查询</td>
+                <td>证券冻结与轮候冻结变动明细</td>
+                <td>变动明细</td>
+                <td>/</td>
+                <td>/</td>
+                <td>港股通结算页面</td>
+                <td>ZA_0001_0008</td>
+                <td>/</td>
+            </tr>
+            <tr>
+                <td>交通部查询</td>
+                <td>/</td>
+                <td>/</td>
+                <td>/</td>
+                <td>/</td>
+                <td>港式结算</td>
+                <td>ZA_0001_0009</td>
+                <td>/</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        $(document).ready(function() {
+            // DataTables initialization
+            var table = $('#example').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                initComplete: function () {
+                    this.api().columns().every(function () {
+                        var column = this;
+                        var select = $('<select><option value=""></option></select>')
+                            .appendTo($(column.footer()).empty())
+                            .on('change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                column
+                                    .search(val ? '^' + val + '$' : '', true, false)
+                                    .draw();
+                            });
+
+                        column.data().unique().sort().each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d + '</option>')
+                        });
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

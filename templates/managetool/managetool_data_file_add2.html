@@ -1,0 +1,111 @@
+{% extends "layouts/base.html" %}
+{% load project_extras static %}
+{% load custom_filters %}
+{% block title %} 数据文件 {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+    <link href="{% static 'admin/css/custom.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-grid.css">
+    <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css">
+
+    <style>
+        .custom-header-class .th-inner {
+            color: rgba(128, 234, 248, 0.8); /* 改变文本颜色 */
+        }
+    /* 修改下拉框选项字体颜色 */
+        .bootstrap-select .dropdown-menu li a {
+            color: red;  /* 你想要的颜色 */
+        }
+
+        /* 修改选中项字体颜色 */
+        .bootstrap-select .dropdown-toggle .filter-option {
+            color: blue;  /* 你想要的颜色 */
+        }
+    </style>
+{% endblock stylesheets %}
+{% block content %}
+    <div class="pcoded-content">
+        <div class="pcoded-inner-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <div class="main-body">
+                <div class="page-wrapper">
+                    <!-- [ Main Content ] start -->
+                    <div class="row">
+                        <!-- [ basic-table ] start -->
+                        <div class="col-xl-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><span><i class="feather icon-home">  <a
+                                            href="{% url 'index' %}">首页</a></i></span>
+                                    </h5>
+                                    <span><i class="fa fa-map-marker"></i> 数据文件新增</span>
+                                </div>
+
+                                <div id= 'prolist' style="display: block" class="card-block">
+                                    <div id='alldatafiles' style="display: block" class="table-responsive ">
+                                            <div id="myGrid" class="ag-theme-alpine" style="height: 500px; width: 600px;"></div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+    <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+
+    <script type="text/javascript">
+
+        var columnDefs = [
+            { headerName: "系统名称", field: "system_name" },
+            { headerName: "一级目录", field: "leve_1_name" },
+            { headerName: "二级目录", field: "leve_2_name" },
+            { headerName: "三级目录", field: "leve_3_name" },
+            { headerName: "四级目录", field: "leve_4_name" },
+            { headerName: "功能名称", field: "function_name" },
+            { headerName: "功能编号", field: "function_code" },
+            { headerName: "重要级别", field: "importance_level" }
+        ];
+
+        var rowData = [
+            { system_name: '结算机构A', leve_1_name: '一级目录', leve_2_name: '二级目录', leve_3_name: '三级目录', leve_4_name: '四级目录', function_name: 'A股备付金', function_code: 'ZA', importance_level: '一般类' },
+            { system_name: '结算机构B', leve_1_name: '一级目录1', leve_2_name: '二级目录2', leve_3_name: '三级目录', leve_4_name: '四级目录', function_name: 'A股备付金', function_code: 'ZA', importance_level: '一般类' },
+            { system_name: '结算机构B', leve_1_name: '一级目录1', leve_2_name: '二级目录2', leve_3_name: '三级目录', leve_4_name: '四级目录', function_name: 'A股备付金', function_code: 'ZA', importance_level: '一般类www' },
+            // 更多数据
+        ];
+
+        var gridOptions = {
+            columnDefs: columnDefs,
+            rowData: rowData,
+            animateRows: true,
+            pagination: true
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var gridDiv = document.querySelector('#myGrid');
+            new agGrid.Grid(gridDiv, gridOptions);
+        });
+
+    </script>
+
+{% endblock javascripts %}
