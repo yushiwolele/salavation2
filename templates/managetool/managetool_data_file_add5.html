@@ -1,4 +1,4 @@
-{% extends "layouts/baseNohtmlTag.html" %}
+{#{% extends "layouts/baseNohtmlTag.html" %}#}
 {% load static %}
 <!DOCTYPE html>
 <html>
@@ -16,10 +16,12 @@
     </style>
 </head>
 <body>
+    <button id="addRowBtn">Add Row</button>
+
     <div id="myGrid" class="ag-theme-alpine"></div>
     <script src="{% static 'admin/js/ag-grid-community_dist_ag-grid-community.noStyle.js' %}"></script>
-{#    <script src="{% static 'admin/js/xlsx_0.17.1_xlsx.full.min.js' %}"></script>#}
-    <script src="{% static 'admin/js/ag-grid/ag-grid-community_dist_ag-grid-community.js' %}"></script>
+    <script src="{% static 'admin/js/xlsx_0.17.1_xlsx.full.min.js' %}"></script>
+{#    <script src="{% static 'admin/js/ag-grid/ag-grid-community_dist_ag-grid-community.js' %}"></script>#}
     <script>
         var columnDefs = [
             { headerName: "系统名称", field: "system_name" },
@@ -37,21 +39,45 @@
         ];
 
        // 创建网格选项
+        {#const gridOptions = {#}
+        {#    columnDefs: columnDefs,#}
+        {#    rowData: rowData,#}
+        {#    defaultColDef: {#}
+        {#        //flex: 1,#}
+        {#        minWidth: 150,#}
+        {#        filter: 'agTextColumnFilter', // 默认使用文本过滤器#}
+        {#        //floatingFilter: true, // 启用浮动筛选#}
+        {#    }#}
+        {# };#}
         const gridOptions = {
             columnDefs: columnDefs,
             rowData: rowData,
-            defaultColDef: {
-                flex: 1,
-                minWidth: 150,
-                filter: 'agTextColumnFilter', // 默认使用文本过滤器
-                floatingFilter: true, // 启用浮动筛选
+            onGridReady: function (params) {
+                console.log(params);
+                // Do not assign gridOptions.api here
+                // gridOptions.api = params.api;
+                // gridOptions.columnApi = params.columnApi;
             }
         };
-        // 初始化网格
-        document.addEventListener('DOMContentLoaded', function() {
-            const myGridElement = document.querySelector('#myGrid');
-            agGrid.createGrid(myGridElement, gridOptions);
+
+        const myGridElement = document.querySelector('#myGrid');
+        const grid = agGrid.createGrid(myGridElement, gridOptions); // Store the grid instance
+
+        // 按钮点击事件添加新数据行
+        document.querySelector('#addRowBtn').addEventListener('click', function () {
+            const newItem = {
+                system_name: '风险监测系统AAA',
+                leve_1_name: '结算业务',
+                leve_2_name: '',
+                leve_3_name: '',
+                leve_4_name: '',
+                function_name: 'a股份备付金',
+                function_code: 'za0001',
+                importance_level: '一般类—业务查询'
+            };
+            grid.applyTransaction({ add: [newItem] });
         });
+
     </script>
 </body>
 </html>

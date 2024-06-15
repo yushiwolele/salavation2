@@ -1,0 +1,176 @@
+{% extends "layouts/base.html" %}
+{% load project_extras static %}
+{% block title %} 数据文件-rowmode是Infinite不分页可多选 {% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/ag-grid-community_styles_ag-grid.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/ag-grid-community_styles_ag-theme-alpine.css' %}" />
+    <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/button.css">
+    <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/icon.css">
+    <style>
+    {#html, body, #myGrid {#}
+    {#        height: 100%;#}
+    {#        width: 100%;#}
+    {#        margin: 0;#}
+    {#        padding: 0;#}
+    {#        box-sizing: border-box;#}
+    {#    }#}
+    </style>
+{% endblock stylesheets %}
+{% block content %}
+    <div class="pcoded-content">
+        <div class="pcoded-inner-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <div class="main-body">
+                <div class="page-wrapper">
+                    <!-- [ Main Content ] start -->
+                    <div class="row">
+                        <!-- [ basic-table ] start -->
+                        <div class="col-xl-12">
+
+                            <div class="card" style="height: 100%;" >
+                                <div class="card-header">
+                                    <h5><span><i class="feather icon-home">  <a
+                                            href="{% url 'index' %}">首页</a></i></span>
+                                    </h5>
+                                    <span><i class="fa fa-map-marker"></i> 数据文件列表</span>
+                                </div>
+
+                                <div id= 'prolist' style="display: block" class="card-block" >
+                                    <button type="button" class="el-button el-button--danger">
+                                        <i class="el-icon-delete"></i>
+                                        <span>删除</span>
+                                    </button>
+                                    <button type="button" class="el-button el-button--primary" onclick="go_data_file_add()">
+                                        <i class="el-icon-plus"></i>
+                                        <span>增加</span>
+                                    </button>
+                                    <div id='alldatafiles' style="display: block" class="table-responsive ">
+                                        <div id="myGrid" style="height: 500px;" class="ag-theme-quartz"></div>
+{#                                        <div id="myGrid"   class="ag-theme-quartz"></div>#}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+{% block javascripts %}
+    <script src="{% static 'admin/js/ag-grid-community_dist_ag-grid-community.noStyle.js' %}"></script>
+    <script src="{% static 'admin/js/xlsx_0.17.1_xlsx.full.min.js' %}"></script>
+    <script src="{% static 'admin/js/ag-grid/ag-grid-community_dist_ag-grid-community.js' %}"></script>
+    <script >
+        var checkboxSelection = function (params) {
+          // we put checkbox on the name if we are not doing grouping
+          return params.api.getRowGroupColumns().length === 0;
+        };
+        var headerCheckboxSelection = function (params) {
+          // we put checkbox on the name if we are not doing grouping
+          return params.api.getRowGroupColumns().length === 0;
+        };
+
+        const columnDefs = [
+            {   headerName: "系统名称",
+                field: "system_name",
+                minWidth: 170,
+                checkboxSelection: checkboxSelection,
+                headerCheckboxSelection: headerCheckboxSelection, //如果rowmodel是infinite，则不支持headerCheckboxSelection参数
+              },
+            {#{ headerCheckboxSelection: headerCheckboxSelection, checkboxSelection: checkboxSelection, width: 70 },#}
+            {#{ headerName: "系统名称", field: "system_name", width: 150 },#}
+            //{ headerName: "一级目录", field: "leve_1_name" , 'pinned': 'left'},
+            { headerName: "一级目录", field: "leve_1_name" , width: 150 },
+            { headerName: "二级目录", field: "leve_2_name" , width: 150 },
+            { headerName: "三级目录", field: "leve_3_name", width: 150  },
+            { headerName: "四级目录", field: "leve_4_name" , width: 150 },
+            { headerName: "功能名称", field: "function_name" , width: 150 },
+            { headerName: "功能编号", field: "function_code", width: 150  },
+            { headerName: "重要级别", field: "importance_level", width: 150  }
+        ];
+        var ALPHABET = "abcdefghijklmnopqrstuvwxyz".split("");
+
+        function getColumnDefs() {
+            const columnDefs = [
+                { checkboxSelection: true, headerName: "", width: 60 }, //第一列列头
+                { headerName: "#", width: 80, valueGetter: "node.rowIndex" },//第二列列头，node.rowIndex是内置参数，从0开始+1递增
+            ];
+
+            ALPHABET.forEach((letter) => {
+                columnDefs.push({
+                    headerName: letter.toUpperCase(),
+                    field: letter,
+                    width: 150,
+                });
+            });
+            return columnDefs;
+        }
+
+        let gridApi;
+
+        const gridOptions = {
+            columnDefs: getColumnDefs(),
+            rowModelType: "infinite",
+            rowSelection: "multiple",
+            maxBlocksInCache: 2,
+            suppressRowClickSelection: true,
+            getRowId: (params) => {
+                //console.log(params.data); //每一行的值 {"a": "A1 = 17","b": "B1 = 18","c": "C1 = 19","d": "D1 = 20",...}
+                return params.data.a;
+            },
+            datasource: getDataSource(200), //每增加100就触发，调用其中的getRows函数。但传入的参数200没有用，使用 infinite row model 时，params.startRow 和 params.endRow 是由 ag-Grid 内部自动计算和管理的，它们会根据视口大小和滚动位置进行调整，而不是简单地按你传递的行数进行控制。
+            defaultColDef: {
+                sortable: false, //每列是否允许排序
+            },
+        };
+
+        function getDataSource(count) {
+            console.log(count);
+            const dataSource = {
+                rowCount: count,
+                getRows: (params) => {
+                    console.log(params);
+                    console.log(params.startRow);
+                    console.log(params.endRow);
+                    var rowsThisPage = [];
+
+                    for (var rowIndex = params.startRow;rowIndex < params.endRow;rowIndex++) {
+                        var record = {};
+                        ALPHABET.forEach(function (letter, colIndex) {
+                            var randomNumber = 17 + rowIndex + colIndex;
+                            var cellKey = letter.toUpperCase() + (rowIndex + 1);
+                            record[letter] = cellKey + " = " + randomNumber;
+                        });
+                        rowsThisPage.push(record);
+                    }
+
+                    // to mimic server call, we reply after a short delay
+                    setTimeout(() => {
+                        // no need to pass the second 'rowCount' parameter as we have already provided it
+                        params.successCallback(rowsThisPage);
+                    }, 100);
+                },
+            };
+            return dataSource;
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var gridDiv = document.querySelector("#myGrid");
+            gridApi = agGrid.createGrid(gridDiv, gridOptions);
+        });
+
+
+    </script>
+{% endblock javascripts %}

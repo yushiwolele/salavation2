@@ -24,7 +24,7 @@ def managetool_data_file_page_view(request):
     :param request:
     :return:
     '''
-    response = render(request, template_name='managetool/managetool_data_file2.html', context={})
+    response = render(request, template_name='managetool/managetool_data_file6_2.html', context={})
     return response
 
 @csrf_exempt
@@ -217,6 +217,13 @@ def managetool_data_file_preview_page_view(request):
 
 @csrf_exempt
 def get_data(request):
+    limit = int(request.GET.get('page', 10))
+    offset = int(request.GET.get('page_size', 0))
+    startrow = int(request.GET.get('startRow', 10))
+    endRow = int(request.GET.get('endRow', 10))
+    leve_1_name = request.GET.get('leve_1_name','')
+    print(leve_1_name)
+
     data = list(SystemContent.objects.values(
         'system_name',
         'leve_1_name',
@@ -228,13 +235,159 @@ def get_data(request):
         'importance_level'
     ))
     data = [
+        {"system_name": '数据查询统计系统数据查询统计系统数据查询统计系统数据查询统计系统数据查询统计系统数据查询统计系统', "leve_1_name": '结算业务', "leve_2_name": '/',
+         "leve_3_name": '/', "leve_4_name": '/', "function_name": 'a股份备付金', "function_code": 'za0001',
+         "importance_level": '一般类—业务查询'},
+        {"system_name": '数据查询统计系统', "leve_1_name": '结算业务', "leve_2_name": '港股通', "leve_3_name": '港股备份',
+         "leve_4_name": '', "function_name": '支付金预付', "function_code": 'za0021', "importance_level": '一般类—业务类'},
+        {"system_name": '数据查询统计系统', "leve_1_name": '结算业务', "leve_2_name": '港股通', "leve_3_name": '', "leve_4_name": '',
+         "function_name": '银行预付', "function_code": 'Jx0021', "importance_level": ''},
+        {"system_name": '数据查询统计系统', "leve_1_name": '支付业务', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": '三级账户支付', "function_code": 'uu0001', "importance_level": ''},
+        {"system_name": '风险监测系统', "leve_1_name": '等支付金', "leve_2_name": '等预算支付', "leve_3_name": '', "leve_4_name": '',
+         "function_name": '二类账户', "function_code": 'hj0021', "importance_level": '重要类—业务类'},
+        {"system_name": '风险监测系统', "leve_1_name": '', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": '京杭账户', "function_code": 'hj0028', "importance_level": '重要类—业务类'},
+        {"system_name": '风险监测系统', "leve_1_name": '', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": '京杭账户等级支付', "function_code": 'hj0029', "importance_level": ''},
+        {"system_name": '风险监测系统', "leve_1_name": '结算业务', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": 'a股份备付金', "function_code": 'za0001', "importance_level": '一般类—业务查询'},
         {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '/', 'leve_3_name': '/', 'leve_4_name': '/',
          'function_name': 'a股份备付金', 'function_code': 'za0001', 'importance_level': '一般类—业务查询'},
         {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '港股通', 'leve_3_name': '港股备份',
          'leve_4_name': '', 'function_name': '支付金预付', 'function_code': 'za0021', 'importance_level': '一般类—业务类'},
         {'system_name': '风控系统', 'leve_1_name': '结算业务1', 'leve_2_name': '港股通2', 'leve_3_name': '港股备份',
-         'leve_4_name': '四级目录', 'function_name': '支付金预付余额', 'function_code': 'za0022', 'importance_level': '重要类—业务类'}
+         'leve_4_name': '四级目录', 'function_name': '支付金预付余额', 'function_code': 'za0022', 'importance_level': '重要类—业务类'},
+        {"system_name": '风险监测系统', "leve_1_name": '', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": '京杭账户等级支付', "function_code": 'hj0029', "importance_level": ''},
+        {"system_name": '风险监测系统', "leve_1_name": '结算业务', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": 'a股份备付金', "function_code": 'za0001', "importance_level": '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '/', 'leve_3_name': '/', 'leve_4_name': '/',
+         'function_name': 'a股份备付金', 'function_code': 'za0001', 'importance_level': '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '港股通', 'leve_3_name': '港股备份',
+         'leve_4_name': '', 'function_name': '支付金预付', 'function_code': 'za0021', 'importance_level': '一般类—业务类'},
+        {'system_name': '风控系统', 'leve_1_name': '结算业务1', 'leve_2_name': '港股通2', 'leve_3_name': '港股备份',
+         'leve_4_name': '四级目录', 'function_name': '支付金预付余额', 'function_code': 'za0022', 'importance_level': '重要类—业务类'},
+        {"system_name": '风险监测系统', "leve_1_name": '', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": '京杭账户等级支付', "function_code": 'hj0029', "importance_level": ''},
+        {"system_name": '风险监测系统', "leve_1_name": '结算业务', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": 'a股份备付金', "function_code": 'za0001', "importance_level": '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '/', 'leve_3_name': '/', 'leve_4_name': '/',
+         'function_name': 'a股份备付金', 'function_code': 'za0001', 'importance_level': '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '港股通', 'leve_3_name': '港股备份',
+         'leve_4_name': '', 'function_name': '支付金预付', 'function_code': 'za0021', 'importance_level': '一般类—业务类'},
+        {'system_name': '风控系统', 'leve_1_name': '结算业务1', 'leve_2_name': '港股通2', 'leve_3_name': '港股备份',
+         'leve_4_name': '四级目录', 'function_name': '支付金预付余额', 'function_code': 'za0022', 'importance_level': '重要类—业务类'},
+        {"system_name": '风险监测系统', "leve_1_name": '', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": '京杭账户等级支付', "function_code": 'hj0029', "importance_level": ''},
+        {"system_name": '风险监测系统', "leve_1_name": '结算业务', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": 'a股份备付金', "function_code": 'za0001', "importance_level": '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '/', 'leve_3_name': '/', 'leve_4_name': '/',
+         'function_name': 'a股份备付金', 'function_code': 'za0001', 'importance_level': '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '港股通', 'leve_3_name': '港股备份',
+         'leve_4_name': '', 'function_name': '支付金预付', 'function_code': 'za0021', 'importance_level': '一般类—业务类'},
+        {'system_name': '风控系统', 'leve_1_name': '结算业务1', 'leve_2_name': '港股通2', 'leve_3_name': '港股备份',
+         'leve_4_name': '四级目录', 'function_name': '支付金预付余额', 'function_code': 'za0022', 'importance_level': '重要类—业务类'},
+        {"system_name": '风险监测系统', "leve_1_name": '', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": '京杭账户等级支付', "function_code": 'hj0029', "importance_level": ''},
+        {"system_name": '风险监测系统', "leve_1_name": '结算业务', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": 'a股份备付金', "function_code": 'za0001', "importance_level": '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '/', 'leve_3_name': '/', 'leve_4_name': '/',
+         'function_name': 'a股份备付金', 'function_code': 'za0001', 'importance_level': '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '港股通', 'leve_3_name': '港股备份',
+         'leve_4_name': '', 'function_name': '支付金预付', 'function_code': 'za0021', 'importance_level': '一般类—业务类'},
+        {'system_name': '风控系统', 'leve_1_name': '结算业务1', 'leve_2_name': '港股通2', 'leve_3_name': '港股备份',
+         'leve_4_name': '四级目录', 'function_name': '支付金预付余额', 'function_code': 'za0022', 'importance_level': '重要类—业务类'},
+        {"system_name": '风险监测系统', "leve_1_name": '', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": '京杭账户等级支付', "function_code": 'hj0029', "importance_level": ''},
+        {"system_name": '风险监测系统', "leve_1_name": '结算业务', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": 'a股份备付金', "function_code": 'za0001', "importance_level": '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '/', 'leve_3_name': '/', 'leve_4_name': '/',
+         'function_name': 'a股份备付金', 'function_code': 'za0001', 'importance_level': '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '港股通', 'leve_3_name': '港股备份',
+         'leve_4_name': '', 'function_name': '支付金预付', 'function_code': 'za0021', 'importance_level': '一般类—业务类'},
+        {'system_name': '风控系统', 'leve_1_name': '结算业务1', 'leve_2_name': '港股通2', 'leve_3_name': '港股备份',
+         'leve_4_name': '四级目录', 'function_name': '支付金预付余额', 'function_code': 'za0022', 'importance_level': '重要类—业务类'},
+        {"system_name": '风险监测系统', "leve_1_name": '', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": '京杭账户等级支付', "function_code": 'hj0029', "importance_level": ''},
+        {"system_name": '风险监测系统', "leve_1_name": '结算业务', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": 'a股份备付金', "function_code": 'za0001', "importance_level": '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '/', 'leve_3_name': '/', 'leve_4_name': '/',
+         'function_name': 'a股份备付金', 'function_code': 'za0001', 'importance_level': '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '港股通', 'leve_3_name': '港股备份',
+         'leve_4_name': '', 'function_name': '支付金预付', 'function_code': 'za0021', 'importance_level': '一般类—业务类'},
+        {'system_name': '风控系统', 'leve_1_name': '结算业务1', 'leve_2_name': '港股通2', 'leve_3_name': '港股备份',
+         'leve_4_name': '四级目录', 'function_name': '支付金预付余额', 'function_code': 'za0022', 'importance_level': '重要类—业务类'},
+        {"system_name": '风险监测系统', "leve_1_name": '', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": '京杭账户等级支付', "function_code": 'hj0029', "importance_level": ''},
+        {"system_name": '风险监测系统', "leve_1_name": '结算业务', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": 'a股份备付金', "function_code": 'za0001', "importance_level": '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '/', 'leve_3_name': '/', 'leve_4_name': '/',
+         'function_name': 'a股份备付金', 'function_code': 'za0001', 'importance_level': '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '港股通', 'leve_3_name': '港股备份',
+         'leve_4_name': '', 'function_name': '支付金预付', 'function_code': 'za0021', 'importance_level': '一般类—业务类'},
+        {'system_name': '风控系统', 'leve_1_name': '结算业务1', 'leve_2_name': '港股通2', 'leve_3_name': '港股备份',
+         'leve_4_name': '四级目录', 'function_name': '支付金预付余额', 'function_code': 'za0022', 'importance_level': '重要类—业务类'},
+        {"system_name": '风险监测系统', "leve_1_name": '', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": '京杭账户等级支付', "function_code": 'hj0029', "importance_level": ''},
+        {"system_name": '风险监测系统', "leve_1_name": '结算业务', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": 'a股份备付金', "function_code": 'za0001', "importance_level": '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '/', 'leve_3_name': '/', 'leve_4_name': '/',
+         'function_name': 'a股份备付金', 'function_code': 'za0001', 'importance_level': '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '港股通', 'leve_3_name': '港股备份',
+         'leve_4_name': '', 'function_name': '支付金预付', 'function_code': 'za0021', 'importance_level': '一般类—业务类'},
+        {'system_name': '风控系统', 'leve_1_name': '结算业务1', 'leve_2_name': '港股通2', 'leve_3_name': '港股备份',
+         'leve_4_name': '四级目录', 'function_name': '支付金预付余额', 'function_code': 'za0022', 'importance_level': '重要类—业务类'},
+        {"system_name": '风险监测系统', "leve_1_name": '', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": '京杭账户等级支付', "function_code": 'hj0029', "importance_level": ''},
+        {"system_name": '风险监测系统', "leve_1_name": '结算业务', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": 'a股份备付金', "function_code": 'za0001', "importance_level": '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '/', 'leve_3_name': '/', 'leve_4_name': '/',
+         'function_name': 'a股份备付金', 'function_code': 'za0001', 'importance_level': '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '港股通', 'leve_3_name': '港股备份',
+         'leve_4_name': '', 'function_name': '支付金预付', 'function_code': 'za0021', 'importance_level': '一般类—业务类'},
+        {'system_name': '风控系统', 'leve_1_name': '结算业务1', 'leve_2_name': '港股通2', 'leve_3_name': '港股备份',
+         'leve_4_name': '四级目录', 'function_name': '支付金预付余额', 'function_code': 'za0022', 'importance_level': '重要类—业务类'},
+        {"system_name": '风险监测系统', "leve_1_name": '', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": '京杭账户等级支付', "function_code": 'hj0029', "importance_level": ''},
+        {"system_name": '风险监测系统', "leve_1_name": '结算业务', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": 'a股份备付金', "function_code": 'za0001', "importance_level": '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '/', 'leve_3_name': '/', 'leve_4_name': '/',
+         'function_name': 'a股份备付金', 'function_code': 'za0001', 'importance_level': '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '港股通', 'leve_3_name': '港股备份',
+         'leve_4_name': '', 'function_name': '支付金预付', 'function_code': 'za0021', 'importance_level': '一般类—业务类'},
+        {'system_name': '风控系统', 'leve_1_name': '结算业务1', 'leve_2_name': '港股通2', 'leve_3_name': '港股备份',
+         'leve_4_name': '四级目录', 'function_name': '支付金预付余额', 'function_code': 'za0022', 'importance_level': '重要类—业务类'},
+        {"system_name": '风险监测系统', "leve_1_name": '', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": '京杭账户等级支付', "function_code": 'hj0029', "importance_level": ''},
+        {"system_name": '风险监测系统', "leve_1_name": '结算业务', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": 'a股份备付金', "function_code": 'za0001', "importance_level": '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '/', 'leve_3_name': '/', 'leve_4_name': '/',
+         'function_name': 'a股份备付金', 'function_code': 'za0001', 'importance_level': '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '港股通', 'leve_3_name': '港股备份',
+         'leve_4_name': '', 'function_name': '支付金预付', 'function_code': 'za0021', 'importance_level': '一般类—业务类'},
+        {'system_name': '风控系统', 'leve_1_name': '结算业务1', 'leve_2_name': '港股通2', 'leve_3_name': '港股备份',
+         'leve_4_name': '四级目录', 'function_name': '支付金预付余额', 'function_code': 'za0022', 'importance_level': '重要类—业务类'},
+        {"system_name": '风险监测系统', "leve_1_name": '', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": '京杭账户等级支付', "function_code": 'hj0029', "importance_level": ''},
+        {"system_name": '风险监测系统', "leve_1_name": '结算业务', "leve_2_name": '', "leve_3_name": '', "leve_4_name": '',
+         "function_name": 'a股份备付金', "function_code": 'za0001', "importance_level": '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '/', 'leve_3_name': '/', 'leve_4_name': '/',
+         'function_name': 'a股份备付金', 'function_code': 'za0001', 'importance_level': '一般类—业务查询'},
+        {'system_name': '数据查询统计系统', 'leve_1_name': '结算业务', 'leve_2_name': '港股通', 'leve_3_name': '港股备份',
+         'leve_4_name': '', 'function_name': '支付金预付', 'function_code': 'za0021', 'importance_level': '一般类—业务类'},
+        {'system_name': '风控系统', 'leve_1_name': '结算业务1', 'leve_2_name': '港股通2', 'leve_3_name': '港股备份',
+         'leve_4_name': '四级目录', 'function_name': '支付金预付余额', 'function_code': 'za0022', 'importance_level': '重要类—业务类'},
     ]
-    return JsonResponse(data, safe=False)
+    # a = (offset - 1) * limit
+    # data =data[a:a + limit]
+    if leve_1_name:
+        data = [item for item in data if item['leve_1_name'] == leve_1_name]
+
+    data_new = data[startrow:endRow]
+    total_num = data.__len__()
+    #total_num = 71
+    print(data_new)
+    return JsonResponse({'rows': data_new, 'totalCount': total_num}, safe=False)
 
 

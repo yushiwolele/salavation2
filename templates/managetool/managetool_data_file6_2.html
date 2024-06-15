@@ -1,0 +1,345 @@
+{% extends "layouts/base.html" %}
+{% load project_extras static %}
+{% block title %} 数据文件-rowmode是Infinite分页 {% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/ag-grid-community_styles_ag-grid.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/ag-grid-community_styles_ag-theme-alpine.css' %}" />
+    <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/button.css">
+    <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/icon.css">
+     <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/dist/styles/ag-grid.css">
+    <style>
+    {#html, body, #myGrid {#}
+    {#        height: 100%;#}
+    {#        width: 100%;#}
+    {#        margin: 0;#}
+    {#        padding: 0;#}
+    {#        box-sizing: border-box;#}
+    {#    }#}
+    .fas {
+        margin-right: 10px; // 图标之间的间距
+        cursor: pointer;
+        color: rgb(20, 167, 236);
+    }
+    .centered-header {
+    text-align: center !important; /* 使用 !important 来确保样式优先级 */
+}
+    </style>
+{% endblock stylesheets %}
+{% block content %}
+    <div class="pcoded-content">
+        <div class="pcoded-inner-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <div class="main-body">
+                <div class="page-wrapper">
+                    <!-- [ Main Content ] start -->
+                    <div class="row">
+                        <!-- [ basic-table ] start -->
+                        <div class="col-xl-12">
+
+                            <div class="card" style="height: 100%;" >
+                                <div class="card-header">
+                                    <h5><span><i class="feather icon-home">  <a
+                                            href="{% url 'index' %}">首页</a></i></span>
+                                    </h5>
+                                    <span><i class="fa fa-map-marker"></i> 数据文件列表</span>
+                                </div>
+
+                                <div id= 'prolist' style="display: block" class="card-block" >
+                                    <button type="button" class="el-button el-button--danger">
+                                        <i class="el-icon-delete"></i>
+                                        <span>删除</span>
+                                    </button>
+                                    <button type="button" class="el-button el-button--primary" onclick="go_data_file_add()">
+                                        <i class="el-icon-plus"></i>
+                                        <span>增加</span>
+                                    </button>
+                                    <div id='alldatafiles' style="display: block" class="table-responsive ">
+                                        <div id="myGrid" style="height: 1000px;" class="ag-theme-quartz"></div>
+{#                                        <div id="myGrid"   class="ag-theme-quartz"></div>#}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+{% block javascripts %}
+    <script src="{% static 'admin/js/ag-grid-community_dist_ag-grid-community.noStyle.js' %}"></script>
+    <script src="{% static 'admin/js/xlsx_0.17.1_xlsx.full.min.js' %}"></script>
+    <script src="{% static 'admin/js/ag-grid/ag-grid-community_dist_ag-grid-community.js' %}"></script>
+    <script >
+
+        const columnDefs = [
+            {   headerName: "系统名称",
+                field: "system_name",
+                minWidth: 170,
+                checkboxSelection: true,
+                filter: true,
+                headerClass: "centered-header"
+            },
+            {#{ headerName: "系统名称", field: "system_name", width: 150 },#}
+            //{ headerName: "一级目录", field: "leve_1_name" , 'pinned': 'left'},
+            { headerName: "一级目录", field: "leve_1_name" , width: 150 ,filter: true },
+            { headerName: "二级目录", field: "leve_2_name" , width: 150,filter: true },
+            { headerName: "三级目录", field: "leve_3_name", width: 150 ,filter: true },
+            { headerName: "四级目录", field: "leve_4_name" , width: 150 ,filter: true},
+            { headerName: "功能名称", field: "function_name" , width: 150 ,filter: true},
+            { headerName: "功能编号", field: "function_code", width: 150 ,filter: true },
+            { headerName: "重要级别", field: "importance_level", width: 150 ,filter: true },
+            {
+        headerName: "操作",
+                headerClass: "centered-header",
+        maxWidth: 150,
+        cellRenderer: function (params) {
+            // 创建操作列的容器元素
+            const cell = document.createElement('div');
+
+            // 创建复制图标元素
+            const copyIcon = document.createElement('i');
+            copyIcon.className = 'fas fa-copy fa-lg';
+            copyIcon.title = '复制';
+            copyIcon.addEventListener('click', function () {
+                // 处理复制操作，示例：复制 params.data 的内容
+                console.log('复制行数据:', params.data);
+            });
+            cell.appendChild(copyIcon);
+
+            // 创建编辑图标元素
+            const editIcon = document.createElement('i');
+            editIcon.className = 'fas fa-edit fa-lg';
+            editIcon.title = '编辑';
+            editIcon.addEventListener('click', function () {
+                // 处理编辑操作，示例：打开编辑模态框
+                console.log('编辑行数据:', params.data);
+            });
+            cell.appendChild(editIcon);
+
+            // 创建删除图标元素
+            const deleteIcon = document.createElement('i');
+            deleteIcon.className = 'fas fa-trash-alt fa-lg';
+            deleteIcon.title = '删除';
+            deleteIcon.addEventListener('click', function () {
+                // 处理删除操作，示例：弹出确认对话框并删除行
+                const confirmDelete = confirm('确定要删除这行数据吗？');
+                if (confirmDelete) {
+                    console.log('删除行数据:', params.data);
+                    // 如果使用 ag-Grid 提供的 API 删除行
+                    // gridApi.applyTransaction({ remove: [params.data] });
+                }
+            });
+            cell.appendChild(deleteIcon);
+
+            return cell;
+        },
+    }
+        ];
+
+        const gridOptions = {
+            columnDefs: columnDefs,
+            defaultColDef: {
+                flex: 1, //列的宽度按比例分配，flex: 1 表示所有列平分容器宽度。
+                minWidth: 150,
+                //floatingFilter: true,//在列标题下方显示浮动过滤器，便于快速过滤列数据。
+                //filter: true
+                sortable: false,
+            },
+            rowSelection: "multiple",
+            rowModelType: "infinite",
+            cacheBlockSize: 10, //每次从服务器加载 100 行数据。
+            cacheOverflowSize: 2,//当缓存满时，可以额外多缓存 2 个块（200 行数据）的数据.每个块（block）包含一组行数据，具体大小由 cacheBlockSize 决定。
+            maxConcurrentDatasourceRequests: 2, //允许同时发送 2 个数据请求，防止过多请求影响性能。
+            infiniteInitialRowCount: 1, //初始加载时，虚拟滚动条将假定有 1 行数据，后续滚动时将动态调整。
+            maxBlocksInCache: 2,//最多缓存 2 个数据块，防止内存占用过高。
+            pagination: true,
+            paginationAutoPageSize: true, //根据容器大小自动调整每页显示的行数。
+            suppressRowClickSelection: true, // 禁止通过点击行来选择行
+            //domLayout: 'autoHeight', // 设置自动高度。用rowModelType: "infinite"+paginationAutoPageSize: true时，这个选项没有什么用，因为ag-grid会内部计算高度，这里看到默认3条高度。如果设置了height:500px，默认8-9条。
+            // debug: true,
+            getRowId: (params) => {
+                return params.data.id;
+            },
+
+            datasource: {
+                getRows: (params) => {
+                    console.log(params.filterModel);
+                    console.log("Requesting rows from " + params.startRow + " to " + params.endRow);
+
+                    const { startRow, endRow, sortModel, filterModel } = params;
+
+                    const sortQueryString = sortModel.map(item => `sortColId=${item.colId}&sort=${item.sort}`).join('&');
+                    const filterQueryString = Object.entries(filterModel).map(([key, value]) => {
+                        return `${key}=${encodeURIComponent(value.filter)}`;
+                     }).join('&');
+
+                    const url = `{% url 'testcases:get_data' %}?startRow=${startRow}&endRow=${endRow}&${sortQueryString}&${filterQueryString}`;
+                    //const url = `{% url 'testcases:get_data' %}?startRow=${startRow}&endRow=${endRow}`;
+                    console.log(url);
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(data => {
+
+                            const rowsThisPage = data.rows;
+                            console.log(rowsThisPage);
+                            const lastRow = data.totalCount <= params.endRow ? data.totalCount : -1;
+
+                            params.successCallback(rowsThisPage, lastRow);
+                        })
+                        .catch(error => {
+                            console.error('Error fetching data:', error);
+                            params.failCallback();
+                        });
+                }
+            }
+
+        };
+
+
+        const gridDiv = document.querySelector("#myGrid");
+        gridApi = agGrid.createGrid(gridDiv, gridOptions);
+        // 自定义单元格渲染器
+        //agGrid.ComponentUtil.registerRenderer("actionsRenderer", ActionsRenderer);
+
+        function sortAndFilter(allOfTheData, sortModel, filterModel) {
+            return sortData(sortModel, filterData(filterModel, allOfTheData));
+        }
+        function sortData(sortModel, data) {
+            const sortPresent = sortModel && sortModel.length > 0;
+            if (!sortPresent) {
+                return data;
+            }
+            // do an in memory sort of the data, across all the fields
+            const resultOfSort = data.slice();
+            resultOfSort.sort(function (a, b) {
+                for (let k = 0; k < sortModel.length; k++) {
+                    const sortColModel = sortModel[k];
+                    const valueA = a[sortColModel.colId];
+                    const valueB = b[sortColModel.colId];
+                    // this filter didn't find a difference, move onto the next one
+                    if (valueA == valueB) {
+                        continue;
+                    }
+                    const sortDirection = sortColModel.sort === "asc" ? 1 : -1;
+                    if (valueA > valueB) {
+                        return sortDirection;
+                    } else {
+                        return sortDirection * -1;
+                    }
+                }
+                // no filters found a difference
+                return 0;
+            });
+            return resultOfSort;
+        }
+
+        function filterData(filterModel, data) {
+            const filterPresent = filterModel && Object.keys(filterModel).length > 0;
+            if (!filterPresent) {
+                return data;
+            }
+
+            const resultOfFilter = [];
+            for (let i = 0; i < data.length; i++) {
+                const item = data[i];
+                console.log(item);
+                if (filterModel.leve_1_name) {
+                    const leve_1_name = item.leve_1_name;
+                    const allowedAge = filterModel.leve_1_name.filter;
+                    // EQUALS = 1;
+                    // LESS_THAN = 2;
+                    // GREATER_THAN = 3;
+                    if (filterModel.leve_1_name.type == "contains") {
+                        if (leve_1_name !== allowedAge) {
+                            continue;
+                        }
+                    }
+                    {#else if (filterModel.age.type == "lessThan") {#}
+                    {#    if (age >= allowedAge) {#}
+                    {#        continue;#}
+                    {#    }#}
+                    {# } else {#}
+                    {#    if (age <= allowedAge) {#}
+                    {#        continue;#}
+                    {#    }#}
+                    {# }#}
+
+                }
+
+
+                resultOfFilter.push(item);
+            }
+
+            return resultOfFilter;
+        }
+
+
+
+
+
+
+
+
+
+
+        //const url = `{% url 'testcases:get_data' %}?page=1&page_size=2`;
+
+        // setup the grid after the page has finished loading
+        {#document.addEventListener("DOMContentLoaded", function () {#}
+        {#    const gridDiv = document.querySelector("#myGrid");#}
+        {#    gridApi = agGrid.createGrid(gridDiv, gridOptions);#}
+        {#    const url = `{% url 'testcases:get_data' %}`;#}
+        {#    fetch(url)#}
+        {#    .then((response) => response.json())#}
+        {#    .then(function (data) {#}
+        {##}
+        {#        data.forEach(function (d, index) {#}
+        {#            d.id = "R" + (index + 1);#}
+        {#        });#}
+        {#        const dataSource = {#}
+        {#            rowCount: undefined, // behave as infinite scroll#}
+        {#            getRows: (params) => {#}
+        {#                console.log("asking for " + params.startRow + " to " + params.endRow);#}
+        {#                // At this point in your code, you would call the server.#}
+        {#                // To make the demo look real, wait for 500ms before returning#}
+        {#                setTimeout(() => {#}
+        {#                    // take a slice of the total rows#}
+        {#                    const dataAfterSortingAndFiltering = sortAndFilter(#}
+        {#                        data,#}
+        {#                        params.sortModel,#}
+        {#                        params.filterModel,#}
+        {#                    );#}
+        {#                    const rowsThisPage = dataAfterSortingAndFiltering.slice(#}
+        {#                        params.startRow,#}
+        {#                        params.endRow,#}
+        {#                    );#}
+        {#                    // if on or after the last page, work out the last row.#}
+        {#                    let lastRow = -1;#}
+        {#                    if (dataAfterSortingAndFiltering.length <= params.endRow) {#}
+        {#                        lastRow = dataAfterSortingAndFiltering.length;#}
+        {#                    }#}
+        {#                    // call the success callback#}
+        {#                    params.successCallback(rowsThisPage, lastRow);#}
+        {#                }, 500);#}
+        {#            },#}
+        {#        };#}
+        {##}
+        {#        gridApi.setGridOption("datasource", dataSource);#}
+        {#    });#}
+        {# });#}
+
+
+    </script>
+{% endblock javascripts %}
