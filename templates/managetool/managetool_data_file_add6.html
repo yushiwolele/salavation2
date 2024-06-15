@@ -310,38 +310,6 @@
             }
         })
 
-
-
-
-
-
-
-
-
-
-
-
-
-        {#$('#functionName').on('change',function(){#}
-        {#    let functionName = $(this).val();#}
-        {#    let filteredItem = systemStructures.filter(item => item.function_name === functionName);#}
-        {#    changeItem(filteredItem, "systemName", "level1",  "level2", "level3", "level4", "functionCode", "importanceLevel", 'system_name');#}
-        {#})#}
-        {##}
-        {#function changeItem(items, t1, t2, t3, t4, t5, t6, t7, s1, s2, s3, s4, s5, s6, s7) {#}
-        {#     $('#' + t1 + ', #' + t2 + ', #' + t3 + ', #' + t4 + ', #' + t5 + ', #' + t6 + ', #' + t7).empty();#}
-        {#    items.forEach(item => {#}
-        {#        console.log(item)#}
-        {#        $('#'+t1).append(new Option(item[s1], item[s1]));#}
-        {#        $('#level1').append(new Option(item.leve_1_name, item.leve_1_name));#}
-        {#        $('#level2').append(new Option(item.leve_2_name, item.leve_2_name));#}
-        {#        $('#level3').append(new Option(item.leve_3_name, item.leve_3_name));#}
-        {#        $('#level4').append(new Option(item.leve_4_name, item.leve_4_name));#}
-        {#        $('#functionCode').append(new Option(item.function_code, item.function_code));#}
-        {#        $('#importanceLevel').append(new Option(item.importance_level, item.importance_level));#}
-        {#    });#}
-        {#}#}
-
     </script>
 
 {% endblock javascripts %}

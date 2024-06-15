@@ -1,0 +1,158 @@
+{#<!DOCTYPE html>#}
+<html lang="zh-Hans-CN">
+{% load static %}
+<head>
+    <title>
+        自动化平台 | {% block title %}数据文件{% endblock %}
+    </title>
+		<script src="{% static '/assets/js/html5shiv.js' %}"></script>
+		<script src="{% static '/assets/js/respond.min.js' %}"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="description" content="Datta Able Bootstrap admin template made using Bootstrap 4 and it has huge amount of ready made feature, UI components, pages which completely fulfills any dashboard needs." />
+    <meta name="keywords" content="admin templates, bootstrap admin templates, bootstrap 4, dashboard, dashboard templets, sass admin templets, html admin templates, responsive, bootstrap admin templates free download,premium bootstrap admin templates, datta able, datta able bootstrap admin template, free admin theme, free dashboard template"/>
+    <meta name="author" content="CodedThemes"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/ag-grid-community_styles_ag-grid.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/ag-grid-community_styles_ag-theme-alpine.css' %}" />
+    <link rel="icon" href="{% static 'assets/images/favicon.ico' %}" type="image/x-icon">
+    <link rel="stylesheet" href="{% static 'assets/fonts/fontawesome/css/fontawesome-all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/plugins/animation/css/animate.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/plugins/bootstrap/css/bootstrap-select.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/vendor/select2/select2.min.css' %}" />
+    <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/button.css">
+    <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/icon.css">
+    <style>
+        {#html, body, #myGrid {#}
+        {#    height: 100%;#}
+        {#    width: 100%;#}
+        {#    margin: 0;#}
+        {#    padding: 0;#}
+        {#    box-sizing: border-box;#}
+        {# }#}
+    </style>
+</head>
+<body>
+    <div class="loader-bg">
+        <div class="loader-track">
+            <div class="loader-fill"></div>
+        </div>
+    </div>
+    {% include 'includes/sidebar.html' %}
+    <div class="pcoded-main-container">
+        <div class="pcoded-wrapper">
+            {% include 'includes/navigation.html' %}
+{#            {% block content %}#}
+
+
+<div class="pcoded-content">
+        <div class="pcoded-inner-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="main-body">
+
+                <div class="page-wrapper">
+                    <div class="row">
+                        <div class="col-xl-12">
+
+                            <div class="card">
+                                <div id="myGrid" style="height: 100%;" class="ag-theme-quartz"></div>
+                                <div class="card-header">
+                                    <h5><span><i class="feather icon-home">  <a
+                                            href="{% url 'index' %}">首页</a></i></span>
+                                    </h5>
+                                    <span><i class="fa fa-map-marker"></i> 数据文件列表</span>
+                                </div>
+                                <div id= 'prolist' style="display: block" class="card-block">
+                                    <button type="button" class="el-button el-button--danger">
+                                        <i class="el-icon-delete"></i>
+                                        <span>删除</span>
+                                    </button>
+                                    <button type="button" class="el-button el-button--primary" onclick="go_data_file_add()">
+                                        <i class="el-icon-plus"></i>
+                                        <span>增加</span>
+                                    </button>
+                                    <div class="el-button-group btn-group btn-group-right">
+                                        <a href="javascript:;" class="el-button el-button--default"><span class="el-icon-search"></span></a>
+                                    </div>
+                                    <div id='alldatafiles' style="display: block" class="table-responsive ">
+                                        <table id='managetool_data_file_table' class="table table-striped">
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+{#            {% endblock content %}#}
+
+        </div>
+
+    </div>
+
+
+
+    {% include 'includes/scripts.html' %}
+    {% block javascripts %}
+        <script src="{% static 'admin/js/ag-grid-community_dist_ag-grid-community.noStyle.js' %}"></script>
+        <script src="{% static 'admin/js/xlsx_0.17.1_xlsx.full.min.js' %}"></script>
+        <script src="{% static 'admin/js/ag-grid/ag-grid-community_dist_ag-grid-community.js' %}"></script>
+        <script type="text/javascript">
+        var columnDefs = [
+            { headerName: "系统名称", field: "system_name" },
+            { headerName: "一级目录", field: "leve_1_name" },
+            { headerName: "二级目录", field: "leve_2_name" },
+            { headerName: "三级目录", field: "leve_3_name" },
+            { headerName: "四级目录", field: "leve_4_name" },
+            { headerName: "功能名称", field: "function_name" },
+            { headerName: "功能编号", field: "function_code" },
+            { headerName: "重要级别", field: "importance_level" }
+        ];
+        var rowData = [
+            { system_name: '数据查询统计系统', leve_1_name: '结算业务', leve_2_name: '/', leve_3_name: '/', leve_4_name: '/', function_name: 'a股份备付金', function_code: 'za0001', importance_level: '一般类—业务查询' },
+            { system_name: '数据查询统计系统', leve_1_name: '结算业务', leve_2_name: '港股通', leve_3_name: '港股备份', leve_4_name: '', function_name: '支付金预付', function_code: 'za0021', importance_level: '一般类—业务类' },
+            { system_name: '数据查询统计系统', leve_1_name: '结算业务', leve_2_name: '港股通', leve_3_name: '', leve_4_name: '', function_name: '银行预付', function_code: 'Jx0021', importance_level: '' },
+            { system_name: '数据查询统计系统', leve_1_name: '支付业务', leve_2_name: '', leve_3_name: '', leve_4_name: '', function_name: '三级账户支付', function_code: 'uu0001', importance_level: '' },
+            { system_name: '风险监测系统', leve_1_name: '等支付金', leve_2_name: '等预算支付', leve_3_name: '', leve_4_name: '', function_name: '二类账户', function_code: 'hj0021', importance_level: '重要类—业务类' },
+            { system_name: '风险监测系统', leve_1_name: '', leve_2_name: '', leve_3_name: '', leve_4_name: '', function_name: '京杭账户', function_code: 'hj0028', importance_level: '重要类—业务类' },
+            { system_name: '风险监测系统', leve_1_name: '', leve_2_name: '', leve_3_name: '', leve_4_name: '', function_name: '京杭账户等级支付', function_code: 'hj0029', importance_level: '' },
+            { system_name: '风险监测系统', leve_1_name: '结算业务', leve_2_name: '', leve_3_name: '', leve_4_name: '', function_name: 'a股份备付金', function_code: 'za0001', importance_level: '一般类—业务查询' },
+        ];
+        const gridOptions = {
+            columnDefs: columnDefs,
+            rowData: rowData,
+            defaultColDef: {
+                flex: 1,
+                minWidth: 150,
+                filter: 'agTextColumnFilter', // 默认使用文本过滤器
+                floatingFilter: true, // 启用浮动筛选
+            }
+        };
+        document.addEventListener('DOMContentLoaded', function() {
+           const myGridElement = document.querySelector('#myGrid');
+            agGrid.createGrid(myGridElement, gridOptions);
+        });
+    </script>
+    {% endblock javascripts %}
+</body>
+</html>

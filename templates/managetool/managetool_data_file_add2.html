@@ -1,33 +1,81 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-{#    <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-grid.css">#}
-{#    <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css">#}
-{#    <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>#}
-{#        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>#}
+{% extends "layouts/base.html" %}
+{% load project_extras static %}
+{% load custom_filters %}
+{% block title %} 数据文件 {% endblock %}
 
-<script src="{% static 'admin/js/ag-grid-community_dist_ag-grid-community.noStyle.js' %}"></script>
-<script src="{% static 'admin/js/xlsx_0.17.1_xlsx.full.min.js' %}"></script>
-<script src="{% static 'admin/js/autocomplete.js' %}"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/ag-grid-community_styles_ag-grid.css' %}" />
-    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/ag-grid-community_styles_ag-theme-alpine.css' %}" />
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+    <link href="{% static 'admin/css/custom.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-grid.css">
+    <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css">
 
+    <style>
+        .custom-header-class .th-inner {
+            color: rgba(128, 234, 248, 0.8); /* 改变文本颜色 */
+        }
+    /* 修改下拉框选项字体颜色 */
+        .bootstrap-select .dropdown-menu li a {
+            color: red;  /* 你想要的颜色 */
+        }
 
-     <style>
-        html, body, #myGrid {
-            height: 100%;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* 修改选中项字体颜色 */
+        .bootstrap-select .dropdown-toggle .filter-option {
+            color: blue;  /* 你想要的颜色 */
         }
     </style>
-</head>
-<body>
-    <div id="myGrid" class="ag-theme-alpine"></div>
+{% endblock stylesheets %}
+{% block content %}
+    <div class="pcoded-content">
+        <div class="pcoded-inner-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <div class="main-body">
+                <div class="page-wrapper">
+                    <!-- [ Main Content ] start -->
+                    <div class="row">
+                        <!-- [ basic-table ] start -->
+                        <div class="col-xl-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><span><i class="feather icon-home">  <a
+                                            href="{% url 'index' %}">首页</a></i></span>
+                                    </h5>
+                                    <span><i class="fa fa-map-marker"></i> 数据文件新增</span>
+                                </div>
 
-    <script>
+                                <div id= 'prolist' style="display: block" class="card-block">
+                                    <div id='alldatafiles' style="display: block" class="table-responsive ">
+                                            <div id="myGrid" class="ag-theme-alpine" style="height: 500px; width: 600px;"></div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+    <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+
+    <script type="text/javascript">
+
         var columnDefs = [
             { headerName: "系统名称", field: "system_name" },
             { headerName: "一级目录", field: "leve_1_name" },
@@ -40,35 +88,24 @@
         ];
 
         var rowData = [
-            { system_name: '数据查询统计系统', leve_1_name: '结算业务', leve_2_name: '/', leve_3_name: '/', leve_4_name: '/', function_name: 'a股份备付金', function_code: 'za0001', importance_level: '一般类—业务查询' },
-            { system_name: '数据查询统计系统', leve_1_name: '结算业务', leve_2_name: '港股通', leve_3_name: '港股备份', leve_4_name: '', function_name: '支付金预付', function_code: 'za0021', importance_level: '一般类—业务类' },
-            { system_name: '数据查询统计系统', leve_1_name: '结算业务', leve_2_name: '港股通', leve_3_name: '', leve_4_name: '', function_name: '银行预付', function_code: 'Jx0021', importance_level: '' },
-            { system_name: '数据查询统计系统', leve_1_name: '支付业务', leve_2_name: '', leve_3_name: '', leve_4_name: '', function_name: '三级账户支付', function_code: 'uu0001', importance_level: '' },
-            { system_name: '风险监测系统', leve_1_name: '等支付金', leve_2_name: '等预算支付', leve_3_name: '', leve_4_name: '', function_name: '二类账户', function_code: 'hj0021', importance_level: '重要类—业务类' },
-            { system_name: '风险监测系统', leve_1_name: '', leve_2_name: '', leve_3_name: '', leve_4_name: '', function_name: '京杭账户', function_code: 'hj0028', importance_level: '重要类—业务类' },
-            { system_name: '风险监测系统', leve_1_name: '', leve_2_name: '', leve_3_name: '', leve_4_name: '', function_name: '京杭账户等级支付', function_code: 'hj0029', importance_level: '' },
-            { system_name: '风险监测系统', leve_1_name: '结算业务', leve_2_name: '', leve_3_name: '', leve_4_name: '', function_name: 'a股份备付金', function_code: 'za0001', importance_level: '一般类—业务查询' },
-
+            { system_name: '结算机构A', leve_1_name: '一级目录', leve_2_name: '二级目录', leve_3_name: '三级目录', leve_4_name: '四级目录', function_name: 'A股备付金', function_code: 'ZA', importance_level: '一般类' },
+            { system_name: '结算机构B', leve_1_name: '一级目录1', leve_2_name: '二级目录2', leve_3_name: '三级目录', leve_4_name: '四级目录', function_name: 'A股备付金', function_code: 'ZA', importance_level: '一般类' },
+            { system_name: '结算机构B', leve_1_name: '一级目录1', leve_2_name: '二级目录2', leve_3_name: '三级目录', leve_4_name: '四级目录', function_name: 'A股备付金', function_code: 'ZA', importance_level: '一般类www' },
             // 更多数据
         ];
 
-       // 创建网格选项
-        const gridOptions = {
+        var gridOptions = {
             columnDefs: columnDefs,
             rowData: rowData,
-            defaultColDef: {
-                flex: 1,
-                minWidth: 150,
-                filter: 'agTextColumnFilter', // 默认使用文本过滤器
-                floatingFilter: true, // 启用浮动筛选
-            }
+            animateRows: true,
+            pagination: true
         };
 
-        // 初始化网格
         document.addEventListener('DOMContentLoaded', function() {
-            const gridDiv = document.querySelector('#myGrid');
+            var gridDiv = document.querySelector('#myGrid');
             new agGrid.Grid(gridDiv, gridOptions);
         });
+
     </script>
-</body>
-</html>
+
+{% endblock javascripts %}
