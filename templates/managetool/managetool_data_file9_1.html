@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-Hans-CN">
+{% load static %}
+<head>
+    <title>
+        ag-header颜色
+    </title>
+    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.js"></script> {% comment %}必须在这里，否则ag-header颜色不生效{% endcomment %}
+    <style>
+    .ag-theme-quartz {
+    --ag-foreground-color: rgb(126, 46, 132);
+    --ag-background-color: rgb(249, 245, 227);
+    --ag-header-foreground-color: rgb(204, 245, 172);
+    --ag-header-background-color: rgb(209, 64, 129);
+    --ag-header-column-resize-handle-color: rgb(126, 46, 132);
+
+    --ag-font-size: 17px;
+    --ag-font-family: monospace;
+}
+    </style>
+</head>
+<body>
+<div id="myGrid" style="height: 1000px;" class="ag-theme-quartz"></div>
+
+
+        <script >
+        const columnDefs = [
+  { field: "athlete", minWidth: 170 },
+  { field: "age" },
+  { field: "country" },
+  { field: "year" },
+  { field: "date" },
+  { field: "sport" },
+  { field: "gold" },
+  { field: "silver" },
+  { field: "bronze" },
+  { field: "total" },
+];
+
+let gridApi;
+
+const gridOptions = {
+  rowData: null,
+  columnDefs: columnDefs,
+  defaultColDef: {
+    editable: true,
+    filter: true,
+  },
+};
+
+// setup the grid after the page has finished loading
+document.addEventListener("DOMContentLoaded", function () {
+  var gridDiv = document.querySelector("#myGrid");
+  gridApi = agGrid.createGrid(gridDiv, gridOptions);
+
+  fetch("https://www.ag-grid.com/example-assets/olympic-winners.json")
+    .then((response) => response.json())
+    .then((data) => gridApi.setGridOption("rowData", data));
+});
+
+    </script>
+
+
+</body>
+</html>

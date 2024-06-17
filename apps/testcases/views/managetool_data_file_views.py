@@ -24,7 +24,7 @@ def managetool_data_file_page_view(request):
     :param request:
     :return:
     '''
-    response = render(request, template_name='managetool/managetool_data_file8.html', context={})
+    response = render(request, template_name='managetool/managetool_data_file6_2.html', context={})
     return response
 
 @csrf_exempt
