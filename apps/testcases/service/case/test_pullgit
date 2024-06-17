@@ -1,0 +1,24 @@
+import subprocess
+import os
+
+def clone_or_pull_repo(repo_url, destination):
+    try:
+        # 检查目标目录是否存在
+        if os.path.exists(destination):
+            # 如果目录存在，尝试执行 git pull 操作
+            subprocess.run(['git', 'pull'], cwd=destination, check=True)
+            print(f'Repository at {destination} updated')
+        else:
+            # 如果目录不存在，则执行 git clone 操作
+            subprocess.run(['git', 'clone', repo_url, destination], check=True)
+            print(f'Repository cloned to {destination}')
+    except subprocess.CalledProcessError as e:
+        print(f'Failed to clone or pull repository: {e}')
+    except Exception as e:
+        print(f'An error occurred: {e}')
+
+# 示例用法
+repo_url = 'git@github.com:yushiwolele/gitskills.git'
+destination = r'E:\pythonproject\salavation2\apps\testcases\service\case\testgit1'
+
+clone_or_pull_repo(repo_url, destination)
