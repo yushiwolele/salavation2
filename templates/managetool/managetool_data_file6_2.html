@@ -2,27 +2,17 @@
 {% load project_extras static %}
 {% block title %} 数据文件-rowmode是Infinite分页 {% endblock %}
 {% block stylesheets %}
-    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/ag-grid-community_styles_ag-grid.css' %}" />
-    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/ag-grid-community_styles_ag-theme-alpine.css' %}" />
     <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/button.css">
     <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/icon.css">
-     <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/dist/styles/ag-grid.css">
     <style>
-    {#html, body, #myGrid {#}
-    {#        height: 100%;#}
-    {#        width: 100%;#}
-    {#        margin: 0;#}
-    {#        padding: 0;#}
-    {#        box-sizing: border-box;#}
-    {#    }#}
     .fas {
         margin-right: 10px; // 图标之间的间距
         cursor: pointer;
         color: rgb(20, 167, 236);
     }
     .centered-header {
-    text-align: center !important; /* 使用 !important 来确保样式优先级 */
-}
+        text-align: center !important; /* 使用 !important 来确保样式优先级 */
+    }
     </style>
 {% endblock stylesheets %}
 {% block content %}
@@ -78,9 +68,7 @@
 
 {% endblock content %}
 {% block javascripts %}
-    <script src="{% static 'admin/js/ag-grid-community_dist_ag-grid-community.noStyle.js' %}"></script>
-    <script src="{% static 'admin/js/xlsx_0.17.1_xlsx.full.min.js' %}"></script>
-    <script src="{% static 'admin/js/ag-grid/ag-grid-community_dist_ag-grid-community.js' %}"></script>
+    <script src="{% static 'admin/js/ag-grid/ag-grid-community.js' %}"></script>
     <script >
 
         const columnDefs = [
@@ -159,7 +147,7 @@
             },
             rowSelection: "multiple",
             rowModelType: "infinite",
-            cacheBlockSize: 10, //每次从服务器加载 100 行数据。
+            cacheBlockSize: 100, //每次从服务器加载 100 行数据。
             cacheOverflowSize: 2,//当缓存满时，可以额外多缓存 2 个块（200 行数据）的数据.每个块（block）包含一组行数据，具体大小由 cacheBlockSize 决定。
             maxConcurrentDatasourceRequests: 2, //允许同时发送 2 个数据请求，防止过多请求影响性能。
             infiniteInitialRowCount: 1, //初始加载时，虚拟滚动条将假定有 1 行数据，后续滚动时将动态调整。
