@@ -1,0 +1,113 @@
+{% extends "layouts/base.html" %}
+{% load project_extras static %}
+{% block title %} 导出csv {% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/button.css">
+    <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/icon.css">
+    <style>
+    .fas {
+        margin-right: 10px; // 图标之间的间距
+        cursor: pointer;
+        color: rgb(20, 167, 236);
+    }
+    .centered-header {
+        text-align: center !important; /* 使用 !important 来确保样式优先级 */
+    }
+    button {
+        display: inline-block;
+        font-weight: bold;
+    }
+    </style>
+{% endblock stylesheets %}
+{% block content %}
+    <div class="pcoded-content">
+        <div class="pcoded-inner-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <div class="main-body">
+                <div class="page-wrapper">
+                    <!-- [ Main Content ] start -->
+                    <div class="row">
+                        <!-- [ basic-table ] start -->
+                        <div class="col-xl-12">
+
+                            <div class="card" style="height: 100%;" >
+                                <div class="card-header">
+                                    <h5><span><i class="feather icon-home">  <a
+                                            href="{% url 'index' %}">首页</a></i></span>
+                                    </h5>
+                                    <span><i class="fa fa-map-marker"></i> 数据文件列表</span>
+                                </div>
+
+                                <div id= 'prolist' style="display: block" class="card-block" >
+                                    <button type="button" class="el-button el-button--danger">
+                                        <i class="el-icon-delete"></i>
+                                        <span>删除</span>
+                                    </button>
+                                    <button type="button" class="el-button el-button--primary" onclick="go_data_file_add()">
+                                        <i class="el-icon-plus"></i>
+                                        <span>增加</span>
+                                    </button>
+                                    <div id='alldatafiles' style="display: block" class="table-responsive ">
+                                        <div id="myGrid" style="height: 1000px;" class="ag-theme-quartz"></div>
+{#                                        <div id="myGrid"   class="ag-theme-quartz"></div>#}
+                                        <div style="display: flex; flex-direction: column; height: 100%;">
+                                            <div style="margin: 10px 0;">
+                                                <button onclick="onBtnExport()">Download CSV export file</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+{% block javascripts %}
+    <script src="{% static 'admin/js/ag-grid/ag-grid-community.js' %}"></script>
+    <script >
+        let gridApi;
+
+        const gridOptions = {
+          defaultColDef: {
+            editable: true,
+            minWidth: 100,
+            flex: 1,
+          },
+
+          suppressExcelExport: true,
+          popupParent: document.body,
+
+          columnDefs: [{ field: "make" }, { field: "model" }, { field: "price" }],
+
+          rowData: [
+            { make: "Toyota", model: "Celica", price: 35000 },
+            { make: "Ford", model: "Mondeo", price: 32000 },
+            { make: "Porsche", model: "Boxster", price: 72000 },
+          ],
+        };
+
+        function onBtnExport() {
+          gridApi.exportDataAsCsv();
+        }
+
+        // setup the grid after the page has finished loading
+        document.addEventListener("DOMContentLoaded", function () {
+          var gridDiv = document.querySelector("#myGrid");
+          gridApi = agGrid.createGrid(gridDiv, gridOptions);
+        });
+    </script>
+{% endblock javascripts %}
