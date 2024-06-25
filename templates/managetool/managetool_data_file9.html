@@ -1,0 +1,127 @@
+{% extends "layouts/base.html" %}
+{% load project_extras static %}
+{% block title %} header样式-在bootstrap中 {% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/button.css">
+    <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/icon.css">
+    <style>
+    .ag-theme-quartz, .ag-theme-quartz-dark {
+    --ag-foreground-color: rgb(126, 46, 132);
+    --ag-background-color: rgb(249, 245, 227);
+    --ag-header-foreground-color: rgb(204, 245, 172);
+    --ag-header-background-color: rgb(209, 64, 129);
+    --ag-header-column-resize-handle-color: rgb(126, 46, 132);
+
+    --ag-font-size: 17px;
+    --ag-font-family: monospace;
+}
+    .asaaa{
+        color: red;
+    }
+    </style>
+{% endblock stylesheets %}
+{% block content %}
+    <div class="pcoded-content">
+        <div class="pcoded-inner-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <div class="main-body">
+                <div class="page-wrapper">
+                    <!-- [ Main Content ] start -->
+                    <div class="row">
+                        <!-- [ basic-table ] start -->
+                        <div class="col-xl-12">
+
+                            <div class="card" style="height: 100%;" >
+                                <div class="card-header">
+                                    <h5><span><i class="feather icon-home">  <a
+                                            href="{% url 'index' %}">首页</a></i></span>
+                                    </h5>
+                                    <span><i class="fa fa-map-marker"></i> 数据文件列表</span>
+                                </div>
+
+                                <div id= 'prolist' style="display: block" class="card-block" >
+                                    <button type="button" class="el-button el-button--danger">
+                                        <i class="el-icon-delete"></i>
+                                        <span>删除</span>
+                                    </button>
+                                    <button type="button" class="el-button el-button--primary" onclick="go_data_file_add()">
+                                        <i class="el-icon-plus"></i>
+                                        <span>增加</span>
+                                    </button>
+                                    <div id='alldatafiles' style="display: block" class="table-responsive ">
+                                        <div style="display: flex; flex-direction: column; height: 100%;">
+                                            <div style="margin: 10px 0;">
+                                                <button onclick="importExcel()" style="margin-bottom: 5px">Import Excel</button>
+                                            </div>
+                                        </div>
+                                        <div id="myGrid" style="height: 1000px;" class="ag-theme-quartz asaaa"></div>
+{#                                        <div id="myGrid"   class="ag-theme-quartz"></div>#}
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+{% block javascripts %}
+    <script src="{% static 'admin/js/ag-grid/ag-grid-community.js' %}"></script>
+    <script lang="javascript" src="{% static 'admin/js/xlsx/xlsx.core.min.js' %}"></script>
+
+    <script >
+        const columnDefs = [
+  { field: "athlete", minWidth: 170 },
+  { field: "age" },
+  { field: "country" },
+  { field: "year" },
+  { field: "date" },
+  { field: "sport" },
+  { field: "gold" },
+  { field: "silver" },
+  { field: "bronze" },
+  { field: "total" },
+];
+
+let gridApi;
+
+const gridOptions = {
+  rowData: null,
+  columnDefs: columnDefs,
+  defaultColDef: {
+    editable: true,
+    filter: true,
+  },
+};
+
+// setup the grid after the page has finished loading
+document.addEventListener("DOMContentLoaded", function () {
+  var gridDiv = document.querySelector("#myGrid");
+  gridApi = agGrid.createGrid(gridDiv, gridOptions);
+
+  fetch("https://www.ag-grid.com/example-assets/olympic-winners.json")
+    .then((response) => response.json())
+    .then((data) => gridApi.setGridOption("rowData", data));
+});
+
+
+
+
+
+
+
+    </script>
+{% endblock javascripts %}

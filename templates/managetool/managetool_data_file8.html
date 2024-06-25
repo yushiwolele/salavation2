@@ -1,0 +1,205 @@
+{% extends "layouts/base.html" %}
+{% load project_extras static %}
+{% block title %} 导出csv {% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/button.css">
+    <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/icon.css">
+    <style>
+    .fas {
+        margin-right: 10px; // 图标之间的间距
+        cursor: pointer;
+        color: rgb(20, 167, 236);
+    }
+    .centered-header {
+        text-align: center !important; /* 使用 !important 来确保样式优先级 */
+    }
+    .example-wrapper {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    #myGrid {
+        flex: 1 1 0px;
+        width: 100%;
+    }
+    </style>
+{% endblock stylesheets %}
+{% block content %}
+    <div class="pcoded-content">
+        <div class="pcoded-inner-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <div class="main-body">
+                <div class="page-wrapper">
+                    <!-- [ Main Content ] start -->
+                    <div class="row">
+                        <!-- [ basic-table ] start -->
+                        <div class="col-xl-12">
+
+                            <div class="card" style="height: 100%;" >
+                                <div class="card-header">
+                                    <h5><span><i class="feather icon-home">  <a
+                                            href="{% url 'index' %}">首页</a></i></span>
+                                    </h5>
+                                    <span><i class="fa fa-map-marker"></i> 数据文件列表</span>
+                                </div>
+
+                                <div id= 'prolist' style="display: block" class="card-block" >
+                                    <button type="button" class="el-button el-button--danger">
+                                        <i class="el-icon-delete"></i>
+                                        <span>删除</span>
+                                    </button>
+                                    <button type="button" class="el-button el-button--primary" onclick="go_data_file_add()">
+                                        <i class="el-icon-plus"></i>
+                                        <span>增加</span>
+                                    </button>
+                                    <div id='alldatafiles' style="display: block" class="table-responsive ">
+                                        <div style="display: flex; flex-direction: column; height: 100%;">
+                                            <div style="margin: 10px 0;">
+                                                <button onclick="importExcel()" style="margin-bottom: 5px">Import Excel</button>
+                                            </div>
+                                        </div>
+                                        <div id="myGrid" style="height: 1000px;" class="ag-theme-quartz"></div>
+{#                                        <div id="myGrid"   class="ag-theme-quartz"></div>#}
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+{% block javascripts %}
+    <script src="{% static 'admin/js/ag-grid/ag-grid-community.js' %}"></script>
+    <script lang="javascript" src="{% static 'admin/js/xlsx/xlsx.core.min.js' %}"></script>
+
+    <script >
+        let gridApi;
+
+        const gridOptions = {
+          columnDefs: [
+            { field: "athlete", minWidth: 180 },
+            { field: "age" },
+            { field: "country", minWidth: 150 },
+            { field: "year" },
+            { field: "date", minWidth: 130 },
+            { field: "sport", minWidth: 100 },
+            { field: "gold" },
+            { field: "silver" },
+            { field: "bronze" },
+            { field: "total" },
+          ],
+            defaultColDef: {
+                minWidth: 80,
+                flex: 1,
+              },
+           rowData: [],
+
+        };
+
+        function makeRequest(method, url, success, error) {
+          var httpRequest = new XMLHttpRequest();
+          httpRequest.open("GET", url, true);
+          httpRequest.responseType = "arraybuffer";
+
+          httpRequest.open(method, url);
+          httpRequest.onload = function () {
+            success(httpRequest.response);
+          };
+          httpRequest.onerror = function () {
+            error(httpRequest.response);
+          };
+          httpRequest.send();
+        }
+
+        // read the raw data and convert it to a XLSX workbook
+        function convertDataToWorkbook(dataRows) {
+          /* convert data to binary string */
+          var data = new Uint8Array(dataRows);
+          var arr = [];
+
+          for (var i = 0; i !== data.length; ++i) {
+            arr[i] = String.fromCharCode(data[i]);
+          }
+
+          var bstr = arr.join("");
+
+          return XLSX.read(bstr, { type: "binary" });
+        }
+
+
+        function populateGrid(workbook) {
+          // our data is in the first sheet
+          var firstSheetName = workbook.SheetNames[0];
+          var worksheet = workbook.Sheets[firstSheetName];
+
+          // we expect the following columns to be present
+          var columns = {
+            A: "athlete",
+            B: "age",
+            C: "country",
+            D: "year",
+            E: "date",
+            F: "sport",
+            G: "gold",
+            H: "silver",
+            I: "bronze",
+            J: "total",
+          };
+
+          var rowData = [];
+
+          // start at the 2nd row - the first row are the headers
+          var rowIndex = 2;
+
+          // iterate over the worksheet pulling out the columns we're expecting
+          while (worksheet["A" + rowIndex]) {
+            var row = {};
+            Object.keys(columns).forEach((column) => {
+              row[columns[column]] = worksheet[column + rowIndex].w;
+            });
+
+            rowData.push(row);
+
+            rowIndex++;
+          }
+
+          // finally, set the imported rowData into the grid
+          gridApi.setGridOption("rowData", rowData);
+        }
+
+        function importExcel() {
+          fetch("https://www.ag-grid.com/example-assets/olympic-data.xlsx")
+            .then((response) => response.arrayBuffer())
+            .then((data) => {
+              const workbook = convertDataToWorkbook(data);
+              populateGrid(workbook);
+            });
+        }
+
+        const gridDiv = document.querySelector("#myGrid");
+        gridApi = agGrid.createGrid(gridDiv, gridOptions);
+
+
+
+
+
+
+
+
+    </script>
+{% endblock javascripts %}

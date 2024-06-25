@@ -1,0 +1,241 @@
+{% extends "layouts/base.html" %}
+{% load project_extras static %}
+{% block title %} 数据文件-rowmode是clientside {% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/ag-grid-community_styles_ag-grid.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/ag-grid-community_styles_ag-theme-alpine.css' %}" />
+    <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/button.css">
+    <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/icon.css">
+    <style>
+    {#html, body, #myGrid {#}
+    {#        height: 100%;#}
+    {#        width: 100%;#}
+    {#        margin: 0;#}
+    {#        padding: 0;#}
+    {#        box-sizing: border-box;#}
+    {#    }#}
+    </style>
+{% endblock stylesheets %}
+{% block content %}
+    <div class="pcoded-content">
+        <div class="pcoded-inner-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <div class="main-body">
+                <div class="page-wrapper">
+                    <!-- [ Main Content ] start -->
+                    <div class="row">
+                        <!-- [ basic-table ] start -->
+                        <div class="col-xl-12">
+
+                            <div class="card" style="height: 100%;" >
+                                <div class="card-header">
+                                    <h5><span><i class="feather icon-home">  <a
+                                            href="{% url 'index' %}">首页</a></i></span>
+                                    </h5>
+                                    <span><i class="fa fa-map-marker"></i> 数据文件列表</span>
+                                </div>
+
+                                <div id= 'prolist' style="display: block" class="card-block" >
+                                    <button type="button" class="el-button el-button--danger">
+                                        <i class="el-icon-delete"></i>
+                                        <span>删除</span>
+                                    </button>
+                                    <button type="button" class="el-button el-button--primary" onclick="go_data_file_add()">
+                                        <i class="el-icon-plus"></i>
+                                        <span>增加</span>
+                                    </button>
+                                    <div id='alldatafiles' style="display: block" class="table-responsive ">
+{#                                        <div id="myGrid" style="height: 500px;" class="ag-theme-quartz"></div>#}
+                                        <div id="myGrid"   class="ag-theme-quartz"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+{% block javascripts %}
+    <script src="{% static 'admin/js/ag-grid-community_dist_ag-grid-community.noStyle.js' %}"></script>
+    <script src="{% static 'admin/js/xlsx_0.17.1_xlsx.full.min.js' %}"></script>
+    <script src="{% static 'admin/js/ag-grid/ag-grid-community_dist_ag-grid-community.js' %}"></script>
+    <script >
+        var checkboxSelection = function (params) {
+          // we put checkbox on the name if we are not doing grouping
+          return params.api.getRowGroupColumns().length === 0;
+        };
+        var headerCheckboxSelection = function (params) {
+          // we put checkbox on the name if we are not doing grouping
+          return params.api.getRowGroupColumns().length === 0;
+        };
+
+            const columnDefs = [
+                {   headerName: "系统名称",
+                    field: "system_name",
+                    minWidth: 170,
+                    checkboxSelection: checkboxSelection,
+                    headerCheckboxSelection: headerCheckboxSelection,
+                  },
+                {#{ headerCheckboxSelection: headerCheckboxSelection, checkboxSelection: checkboxSelection, width: 70 },#}
+                {#{ headerName: "系统名称", field: "system_name", width: 150 },#}
+                //{ headerName: "一级目录", field: "leve_1_name" , 'pinned': 'left'},
+                { headerName: "一级目录", field: "leve_1_name" , width: 150 },
+                { headerName: "二级目录", field: "leve_2_name" , width: 150 },
+                { headerName: "三级目录", field: "leve_3_name", width: 150  },
+                { headerName: "四级目录", field: "leve_4_name" , width: 150 },
+                { headerName: "功能名称", field: "function_name" , width: 150 },
+                { headerName: "功能编号", field: "function_code", width: 150  },
+                { headerName: "重要级别", field: "importance_level", width: 150  }
+            ];
+        {#const columnDefs = [#}
+        {#      {#}
+        {#        field: "athlete",#}
+        {#        minWidth: 170,#}
+        {#        checkboxSelection: checkboxSelection,#}
+        {#        headerCheckboxSelection: headerCheckboxSelection,#}
+        {#      },#}
+        {#      { field: "age" },#}
+        {#      { field: "country" },#}
+        {#      { field: "year" },#}
+        {#      { field: "date" },#}
+        {#      { field: "sport" },#}
+        {#      { field: "gold" },#}
+        {#      { field: "silver" },#}
+        {#      { field: "bronze" },#}
+        {#      { field: "total" },#}
+        {#    ];#}
+
+            var autoGroupColumnDef = {
+                  headerName: "Group",
+                  minWidth: 170,
+                  field: "athlete",
+                  valueGetter: (params) => {
+                    if (params.node.group) {
+                      return params.node.key;
+                    } else {
+                      return params.data[params.colDef.field];
+                    }
+                  },
+                  headerCheckboxSelection: true,
+                  cellRenderer: "agGroupCellRenderer",
+                  cellRendererParams: {
+                    checkbox: true,
+                  },
+            };
+            let gridApi;
+
+            const gridOptions = {
+                defaultColDef: {
+                    editable: true,
+                    enableRowGroup: true,
+                    enablePivot: true,
+                    enableValue: true,
+                    filter: true,
+                    flex: 1,
+                    minWidth: 100,
+                },
+                suppressRowClickSelection: true,
+                groupSelectsChildren: true,
+                // debug: true,
+                rowGroupPanelShow: "always",
+                pivotPanelShow: "always",
+                rowSelection:'multiple',// 启用多选
+                columnDefs: columnDefs,
+                pagination: true,
+                autoGroupColumnDef: autoGroupColumnDef,
+                domLayout: 'autoHeight', // 设置自动高度
+                onPaginationChanged: onPaginationChanged,
+                paginationPageSize: 10,
+                paginationPageSizeSelector: [10, 20, 30],
+                //rowModelType: 'viewport',
+                //cacheBlockSize: 10,
+                //maxBlocksInCache: 5,
+                {#datasource: {#}
+                {#    getRows(params) {#}
+                {#        const pageNumber = Math.floor(params.startRow / gridOptions.paginationPageSize) + 1;#}
+                {#        fetchGridData(params, pageNumber);#}
+                {#    }#}
+                {# },#}
+                {#onGridReady: function(params) {#}
+                {#    params.api.sizeColumnsToFit();#}
+                {#    const { api } = params;#}
+                {#    fetchGridData(api, 1); // 页面加载时请求第一页数据#}
+                {# }#}
+            };
+            function onPaginationChanged() {
+                console.log("onPaginationPageLoaded");
+
+                if (gridApi) {
+                    let pageSize = gridApi.paginationGetPageSize();
+                    let pageNumber = gridApi.paginationGetCurrentPage() + 1;
+                    {#const url = `{% url 'testcases:get_data' %}?page=${pageNumber}&page_size=${pageSize}`;#}
+                    {##}
+                    {#fetch(url)#}
+                    {#.then((response) => response.json())#}
+                    {#.then((data) => gridApi.setGridOption("rowData", data));#}
+
+                    console.log(gridApi.paginationIsLastPageFound());
+                    console.log(gridApi.paginationGetPageSize()); //每页多少条
+                    console.log(gridApi.paginationGetCurrentPage() + 1); //第几页
+                    console.log(gridApi.paginationGetTotalPages()); //一共几页
+                    {#setText("#lbLastPageFound", gridApi.paginationIsLastPageFound());#}
+                    {#setText("#lbPageSize", gridApi.paginationGetPageSize());#}
+                    {#setText("#lbCurrentPage", gridApi.paginationGetCurrentPage() + 1);#}
+                    {#setText("#lbTotalPages", gridApi.paginationGetTotalPages());#}
+                    {#setLastButtonDisabled(!gridApi.paginationIsLastPageFound());#}
+                }
+
+            }
+            // setup the grid after the page has finished loading
+            document.addEventListener("DOMContentLoaded", function () {
+                var gridDiv = document.querySelector("#myGrid");
+                gridApi = agGrid.createGrid(gridDiv, gridOptions);
+                const url = `{% url 'testcases:get_data' %}?page=1&page_size=2`;
+                //const url = `{% url 'testcases:get_data' %}`;
+                console.log();
+                fetch(url)
+                .then((response) => response.json())
+                .then((data) => gridApi.setGridOption("rowData", data));
+            });
+
+
+            {#const gridDiv = document.querySelector('#myGrid');#}
+            {#const grid = agGrid.createGrid(gridDiv, gridOptions);#}
+            {##}
+            {#function fetchGridData(params, pageNumber) {#}
+            {#    const pageSize = gridOptions.paginationPageSize;#}
+            {#    const url = `{% url 'testcases:get_data' %}?page=${pageNumber}&page_size=${pageSize}`;#}
+            {##}
+            {#    fetch(url)#}
+            {#        .then(response => response.json())#}
+            {#        .then(data => {#}
+            {#            const rowData = data.results; // 假设后端返回的数据在 results 字段中#}
+            {#            const lastRow = data.count <= params.endRow ? data.count : -1;#}
+            {##}
+            {#            // 将数据添加到网格中#}
+            {#            params.applyTransaction({ add: rowData });#}
+            {#            // 设置网格总行数（用于分页）#}
+            {#            params.paginationSetPageSize(pageSize);#}
+            {#        })#}
+            {#        .catch(error => {#}
+            {#            console.error('Error fetching data:', error);#}
+            {#            params.failCallback();#}
+            {#        });#}
+            {# }#}
+
+
+    </script>
+{% endblock javascripts %}
