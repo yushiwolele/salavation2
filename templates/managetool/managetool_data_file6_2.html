@@ -2,7 +2,7 @@
 {% load project_extras static %}
 {% block title %} 数据文件-rowmode是Infinite分页 {% endblock %}
 {% block stylesheets %}
-
+<script src="{% static 'admin/js/ag-grid/ag-grid-community.js' %}"></script>
     <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/button.css">
     <link rel="stylesheet" href="/static/admin/simpleui-x/elementui/theme-chalk/icon.css">
     <style>
@@ -15,6 +15,9 @@
         text-align: center !important; /* 使用 !important 来确保样式优先级 */
     }
 
+    .nooutline {
+        --ag-range-selection-border-style: none;
+    }
     </style>
 {% endblock stylesheets %}
 {% block content %}
@@ -70,7 +73,7 @@
 
 {% endblock content %}
 {% block javascripts %}
-    <script src="{% static 'admin/js/ag-grid/ag-grid-community.js' %}"></script>
+
     <script >
 
         const columnDefs = [
@@ -79,7 +82,8 @@
                 minWidth: 170,
                 checkboxSelection: true,
                 filter: true,
-                headerClass: "centered-header"
+                headerClass: "centered-header",
+                cellClass: 'nooutline',
             },
             {#{ headerName: "系统名称", field: "system_name", width: 150 },#}
             //{ headerName: "一级目录", field: "leve_1_name" , 'pinned': 'left'},
